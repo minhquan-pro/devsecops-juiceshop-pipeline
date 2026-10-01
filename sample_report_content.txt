@@ -1,0 +1,157 @@
+1: HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG
+2: KHOA AN TOÀN THÔNG TIN
+3: BÁO CÁO BÀI TẬP LỚN
+4: HỌC PHẦN: <TÊN HỌC PHẦN>
+5: MÃ HỌC PHẦN: <MÃ HỌC PHẦN>
+6: ĐỀ TÀI: <TÊN ĐỀ TÀI>
+7:   
+8: Các sinh viên thực hiện (trưởng nhóm xếp số 1):
+9: <Mã sinh viên><Họ tên sinh viên>
+10: Tên nhóm: <số nhóm>
+11: Tên lớp: <Tên lớp>
+12: Giảng viên hướng dẫn: <Chức danh> + <Họ tên GV>
+13: HÀ NỘI 2024
+14: PHÂN CÔNG NHIỆM VỤ NHÓM THỰC HIỆN
+15: TT
+16: Công việc / Nhiệm vụ
+17: SV thực hiện
+18: Thời hạn hoàn thành
+19: 1
+20: Tìm hiểu khái quát về Moodle LMS
+21: Nguyễn Văn A
+22: 15/9/2024
+23: 2
+24: 3
+25: 4
+26: NHÓM THỰC HIỆN TỰ ĐÁNH GIÁ
+27: TT
+28: SV thực hiện
+29: Thái độ tham gia
+30: Mức hoàn thành CV
+31: Kỹ năng giao tiếp
+32: Kỹ năng hợp tác
+33: Kỹ năng lãnh đạo
+34: 1
+35: Nguyễn Văn A
+36: 3
+37: 4
+38: 3
+39: 2
+40: 1
+41: 2
+42: 3
+43: 4
+44: Ghi chú:
+45: Thái độ tham gia: Đánh giá điểm thái độ tham gia công việc chung của nhóm (từ 0: không tham gia, đến 5: chủ động, tích cực).
+46: Mức hoàn thành CV: Đánh giá điểm mức độ hoàn thành công việc được giao (từ 0: không hoàn thành, đến 5: hoàn thành xuất sắc).
+47: Kỹ năng giao tiếp: Đánh giá điểm khả năng tương tác, giao tiếp trong nhóm (từ 0: không hoặc giao tiếp rất yếu, đến 5: giao tiếp xuất sắc).
+48: Kỹ năng hợp tác: Đánh giá điểm khả năng hợp tác, hỗ trợ lẫn nhau, giải quyết mâu thuẫn, xung đột
+49: Kỹ năng lãnh đạo: Đánh giá điểm khả năng lãnh đạo (từ 0: không có khả năng lãnh đạo, đến 5: có khả năng lãnh đạo tốt, tổ chức và điều phối công việc trong nhóm hiệu quả).
+50: MỤC LỤC
+51: MỤC LỤC3
+52: DANH MỤC CÁC HÌNH VẼ4
+53: DANH MỤC CÁC BẢNG BIỂU4
+54: DANH MỤC CÁC TỪ VIẾT TẮT5
+55: MỞ ĐẦU6
+56: CHƯƠNG 1. TỔNG QUAN VỀ HỆ THỐNG MOODLE LMS7
+57: 1.1 Giới thiệu7
+58: 1.2 Kiến trúc và tính năng của Moodle LMS7
+59: 1.2.1 Kiến trúc và các thành phần của Moodle LMS7
+60: 1.3 Kết chương7
+61: CHƯƠNG 2. THIẾT KẾ VÀ CÀI ĐẶT CÁC PLUGIN CHO MOODLE LMS8
+62: 2.1 Khái quát8
+63: 2.2 Thiết kế và cài đặt các plugin hỗ trợ quản trị ngân hàng câu hỏi8
+64: 2.2.1 Các yêu cầu8
+65: 2.3 Kết chương8
+66: CHƯƠNG 3. THỬ NGHIỆM VÀ ĐÁNH GIÁ9
+67: 3.1 Triển khai và thử nghiệm trên hệ thống Moodle LMS cục bộ9
+68: 3.1.1 Triển khai trên hệ thống Moodle LMS cục bộ9
+69: 3.2 Kết chương9
+70: KẾT LUẬN10
+71: TÀI LIỆU THAM KHẢO11
+72: DANH MỤC CÁC HÌNH VẼ
+73: Hình 1 - Top 7 ưu điểm nổi bật của Moodle LMS7
+74: Hình 2 - Giao diện hệ thống Moodle LMS cục bộ9
+75: DANH MỤC CÁC BẢNG BIỂU
+76: Bảng 1. Định dạng Aiken của file các câu hỏi trắc nghiệm8
+77: DANH MỤC CÁC TỪ VIẾT TẮT
+78: Từ viết tắt
+79: Thuật ngữ tiếng Anh/Giải thích
+80: Thuật ngữ tiếng Việt/Giải thích
+81: LMS
+82: Learning Management System
+83: Hệ thống quản lý học tập
+84: MỞ ĐẦU
+85: Hệ thống quản lý học tập Moodle (Moodle LMS – Moodle Learning Management System) [1] là một trong các hệ thống quản lý học tập  mã mở, miễn phí, được sử dụng phổ biến trong quản lý các khoá học. Moodle cung cấp tập các tính năng phong phú cho quản lý các khoá học, quản lý người học, quản lý bài tập, thực hành, ngân hàng câu hỏi kiểm tra, thi và các bài kiểm tra, thi… Cụ thể, các tính năng tiêu biểu của Moodle bao gồm:
+86: -Quản lý năm học, học kỳ, các lớp/khoá học và các tài liệu học tập kèm theo.
+87: -Quản lý thành viên, gồm các đối tượng người quản lý, giáo viên và học viên với khả năng phân quyền truy cập khác nhau….
+88: Báo cáo bài tập lớn gồm 3 chương với nội dung chính như sau:
+89: - Chương 1 nghiên cứu tổng quan về Moodle LMS, Moodle plugin và vấn đề phát triển plugin cho Moodle, bao gồm các nội dung khái quát về kiến trúc, tính năng của Moodle LMS, vấn đề cài đặt, quản trị Moodle LMS, giới thiệu về Moodle plugin và phát triển plugin để bổ sung tính năng cho Moodle LMS.
+90: - Chương 2 thực hiện việc phân tích, thiết kế và cài đặt các plug-in phần mềm cho hệ thống Moodle LMS, trong đó bao gồm các plug-in phần mềm hỗ trợ quản trị ngân hàng câu hỏi và các plug-in phần mềm hỗ trợ quản trị nhóm học viên.
+91: - Chương 3 thực hiện việc thử nghiệm và đánh giá bộ plug-in phần mềm bổ sung các tính năng quản trị nhóm học viên và quản trị ngân hàng câu hỏi cho Moodle LMS, trong đó bao gồm việc triển khai và chạy thử bộ plug-in phần mềm trên hệ thống thử nghiệm Moodle LMS cục bộ và Hệ thống quản lý học tập đang vận hành của Khoa An toàn thông tin, Học viện Công nghệ BCVT.
+92: TỔNG QUAN VỀ HỆ THỐNG MOODLE LMS
+93: Giới thiệu
+94: Moodle (Modular Object-Oriented Dynamic Learning Environment) là một phần mềm nền tảng cho hệ thống quản lý học tập [1]. Moodle được phát triển bởi Martin Dougiamas và phiên bản đầu tiên được công bố vào tháng 8/2002. 
+95:  
+96: - Top 7 ưu điểm nổi bật của Moodle LMS
+97: Kiến trúc và tính năng của Moodle LMS
+98: Kiến trúc và các thành phần của Moodle LMS
+99: Kiến trúc của Moodle LMS
+100: Moodle được cấu trúc theo mô đun, gồm một lõi ứng dụng, được bao quanh bởi nhiều plugin (trình cắm hay mô đun bổ sung) để cung cấp chức năng cụ thể. Moodle được thiết kế để có khả năng mở rộng và tùy chỉnh cao mà không cần sửa đổi các thư viện cốt lõi, thuận tiện cho nâng cấp Moodle lên phiên bản mới hơn. Moodle gồm các thành phần chính:
+101: Moodle Core là thành phần của Moodle cung cấp tất cả cơ sở hạ tầng cần thiết để xây dựng Hệ thống quản lý học tập;
+102: Moodle Plugins là các mô đun phần mềm viết bằng PHP, CSS, HTML và JavaScript có thể cài đặt, tích hợp vào Moodle để bổ sung các tính năng;
+103: Kết chương
+104: Chương này đã giới thiệu khái quát về Moodle LMS, kiến trúc, các thành phần của Moodle, các tính năng của Moodle; các bước cài đặt Moodle LMS và vấn đề quản trị Moodle. Chương cũng trình bày khái quát về Moodle plugin và các vấn đề có liên quan đến phát triển Moodle plugin. Đây là nền tảng quan trọng cho việc phát triển một số Moodle plugin hỗ trợ quản trị học viên và ngân hàng câu hỏi trắc nghiệm.
+105: THIẾT KẾ VÀ CÀI ĐẶT CÁC PLUGIN CHO MOODLE LMS
+106: Khái quát
+107: Như đã đề cập trong phần Mở đầu, chương này tập trung vào các nội dung phân tích, thiết kế và cài đặt một số plugin hỗ trợ quản trị ngân hàng câu hỏi và quản trị nhóm học viên. Với các plugin hỗ trợ quản trị ngân hàng câu hỏi, đề tài tập trung thực hiện phát triển và tùy biến các plugin cho phép nhập các câu hỏi trắc nghiệm theo 3 định dạng cơ bản và thông dụng nhất, bao gồm:
+108: Plugin hỗ trợ định dạng câu hỏi Aiken
+109: Plugin hỗ trợ định dạng câu hỏi CSV đơn giản
+110: Thiết kế và cài đặt các plugin hỗ trợ quản trị ngân hàng câu hỏi
+111: Các yêu cầu
+112: Các yêu cầu chung đối với 3 plugin hỗ trợ nhập các câu hỏi trắc nghiệm theo 3 định dạng Aiken, CSV đơn giản và CSV đầy đủ bao gồm:
+113: Cung cấp mô tả định dạng đầy đủ bằng tiếng Việt và có ví dụ minh họa.
+114: Định dạng Aiken: Hỗ trợ nhập các câu hỏi từ file văn bản thuần, trong đó các câu hỏi theo định dạng cho trên Bảng 1.
+115: Định dạng Aiken của file các câu hỏi trắc nghiệm 
+116: Câu hỏi + đáp án
+117: Chú thích
+118: What are correct 3 major components of a basic CPU?
+119: Câu hỏi
+120: A. CU, ALU, Registers
+121: Các đáp án, số đáp án có >= 2, chỉ có 1 đáp án đúng
+122: B. GPU, ALU, Registers
+123: C. CU, ALU, Cache
+124: D. CU, Cache, Registers
+125: ANSWER: A
+126: Đáp án đúng
+127: Dòng trắng giữa các câu hỏi
+128: In computer systems, ...numbering system is used to represent data.
+129: Câu hỏi
+130: A. binary
+131: Các đáp án
+132: B. hexadecimal
+133: C. decimal
+134: ANSWER: A
+135: Đáp án đúng
+136: Kết chương
+137: Chương này liệt kê các yêu cầu và mô tả luồng xử lý của các plugin hỗ trợ quản lý tài khoản người dùng và ghi danh nhóm học viên. Chương cũng cung cấp nguyên tắc phát triển/cài đặt các plugin và cấu trúc thư mục và file cài đặt của chúng khi được cài đặt vào hệ thống.
+138: THỬ NGHIỆM VÀ ĐÁNH GIÁ
+139: Triển khai và thử nghiệm trên hệ thống Moodle LMS cục bộ
+140: Triển khai trên hệ thống Moodle LMS cục bộ
+141: Hệ thống Moodle LMS cục bộ được triển khai trên máy chủ ảo trên địa chỉ http://192.168.163.100. Hình 36 cung cấp giao diện của hệ thống Moodle LMS cục bộ. Các plugin sau phát triển được đóng gói thành các file nén theo định dạng zip và được triển khai, thử nghiệm để sửa lỗi và đánh giá trên hệ thống cục bộ.
+142: - Giao diện hệ thống Moodle LMS cục bộ
+143: Kết chương
+144: Chương này mô tả việc triển khai và thử nghiệm 6 plugin hỗ trợ quản trị ngân hàng câu hỏi trắc nghiệm và quản trị học viên đã được phát triển, tùy biến trên hệ thống Moodle LMS cục bộ và Hệ thống quản lý học tập - Khoa ATTT. Các plugin trên bổ sung các tính năng hữu ích cho giảng viên, giúp việc quản trị người dùng, ghi danh học viên vào khóa học và quản trị ngân hàng câu hỏi dễ dàng và hiệu quả hơn.
+145: KẾT LUẬN
+146: Các kết quả đạt được (nêu các kết quả đã đạt được của BTL)
+147: Nhóm thực hiện đề tài “Phát triển plug-in hỗ trợ quản trị học viên và ngân hàng câu hỏi cho hệ thống quản lý học tập Moodle” đã hoàn thành việc phát triển, tùy biến và thử nghiệm thành công 6 plugin phần mềm hỗ trợ quản trị ngân hàng câu hỏi trắc nghiệm và quản trị nhóm học viên trên hệ thống Moodle LMS cục bộ và Hệ thống quản lý học tập - Khoa An toàn thông tin, Học viện Công nghệ BCVT. Đề tài đã thực hiện đầy đủ các nội dung đã đăng ký theo đề cương như sau:
+148: Nghiên cứu về kiến trúc, tính năng, cài đặt, quản trị Moodle và phát triển plug-in cho Moodle.
+149: Thiết kế và cài đặt các plug-in phần mềm hỗ trợ quản trị ngân hàng câu hỏi.
+150: Thiết kế và cài đặt plug-in phần mềm hỗ trợ quản trị nhóm học viên.
+151: Thử nghiệm và đánh giá bộ plug-in phần mềm bổ sung các tính năng quản trị nhóm học viên và quản trị ngân hàng câu hỏi cho Moodle trên hệ thống Moodle LMS cục bộ và Hệ thống quản lý học tập dựa trên Moodle - Khoa An toàn thông tin, Học viện Công nghệ BCVT.
+152: Hướng phát triển (nêu hướng phát triển, bổ sung, nghiên cứu tiếp của BTL)
+153: Đề tài này có thể được mở rộng theo các hướng sau:
+154: Phát triển các plugin hỗ trợ nhập các câu hỏi có định dạng phức tạp, như công thức toán, các hình vẽ…
+155: Phát triển các plugin hỗ trợ tạo các báo cáo có khả năng tùy biến theo yêu cầu của người dùng.
+156: TÀI LIỆU THAM KHẢO
+157: Hệ thống quản lý học tập Moodle, https://moodle.org, truy cập tháng 10.2023.
