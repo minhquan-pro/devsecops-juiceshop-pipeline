@@ -1,0 +1,23 @@
+{
+  "scope": "Independent mechanism demos; not Juice Shop",
+  "sqlite": {
+    "vulnerable_rows": 2,
+    "parameterized_rows": 0,
+    "normal_rows": 1
+  },
+  "access_control": {
+    "cross_owner_vulnerable": "B_ONLY",
+    "cross_owner_fixed": null,
+    "own_fixed": "A_ONLY"
+  },
+  "path": {
+    "vulnerable_read": "PRIVATE_LAB_MARKER",
+    "fixed_allows_outside": false,
+    "fixed_allows_inside": true
+  },
+  "jwt": {
+    "original_signature_valid": true,
+    "tampered_signature_valid": false,
+    "limit": "Signature mechanism only; not a complete JWT verifier"
+  }
+}

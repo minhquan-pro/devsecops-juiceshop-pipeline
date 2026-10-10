@@ -1,0 +1,74 @@
+[
+  {
+    "id": "SQLI",
+    "name": "SQL Injection",
+    "cwe": "CWE-89",
+    "mechanism": "Dữ liệu làm thay đổi cấu trúc câu truy vấn khi ứng dụng ghép chuỗi SQL.",
+    "defense": "Tham số hóa giá trị, allowlist định danh và giới hạn quyền CSDL.",
+    "url": "https://portswigger.net/web-security/sql-injection"
+  },
+  {
+    "id": "XSS",
+    "name": "Cross Site Scripting",
+    "cwe": "CWE-79",
+    "mechanism": "Nguồn dữ liệu không tin cậy đi vào ngữ cảnh HTML hoặc JavaScript có khả năng thực thi.",
+    "defense": "Mã hóa theo ngữ cảnh, dùng API hiển thị văn bản, kiểm soát HTML có chủ đích.",
+    "url": "https://portswigger.net/web-security/cross-site-scripting"
+  },
+  {
+    "id": "BAC",
+    "name": "Kiểm soát truy cập và IDOR",
+    "cwe": "CWE-639",
+    "mechanism": "Máy chủ không ràng buộc chủ thể hiện tại với đối tượng được yêu cầu.",
+    "defense": "Kiểm tra quyền ở máy chủ cho từng đối tượng và hành động.",
+    "url": "https://portswigger.net/web-security/access-control"
+  },
+  {
+    "id": "JWT",
+    "name": "Xác thực và JWT",
+    "cwe": "CWE-347",
+    "mechanism": "Dữ liệu token được dùng để cấp quyền khi chữ ký, thuật toán hoặc claim chưa được kiểm tra đúng.",
+    "defense": "Cố định thuật toán hợp lệ, xác minh chữ ký, issuer, audience và thời hạn.",
+    "url": "https://portswigger.net/web-security/jwt"
+  },
+  {
+    "id": "PATH",
+    "name": "Path Traversal",
+    "cwe": "CWE-22",
+    "mechanism": "Đường dẫn do người dùng chi phối vượt ra ngoài tập tài nguyên được phép.",
+    "defense": "Ánh xạ ID sang tệp; chuẩn hóa đường dẫn và kiểm tra quan hệ thư mục thực.",
+    "url": "https://portswigger.net/web-security/file-path-traversal"
+  },
+  {
+    "id": "SSRF",
+    "name": "Server Side Request Forgery",
+    "cwe": "CWE-918",
+    "mechanism": "Ứng dụng gửi yêu cầu từ máy chủ tới đích do người dùng điều khiển ngoài phạm vi dự kiến.",
+    "defense": "Allowlist đích, kiểm tra địa chỉ kết nối thực, hạn chế redirect và egress.",
+    "url": "https://portswigger.net/web-security/ssrf"
+  },
+  {
+    "id": "CONFIG",
+    "name": "Cấu hình và rò rỉ thông tin",
+    "cwe": "CWE-200",
+    "mechanism": "Cấu hình triển khai hoặc phản hồi lỗi làm lộ tài nguyên vượt quá nhu cầu nghiệp vụ.",
+    "defense": "Tách tài nguyên quản trị, tối thiểu hóa lỗi trả về và kiểm soát cấu hình môi trường.",
+    "url": "https://portswigger.net/web-security/information-disclosure"
+  },
+  {
+    "id": "XXE",
+    "name": "XML và giải tuần tự hóa",
+    "cwe": "CWE-611 / CWE-502",
+    "mechanism": "Parser xử lý tham chiếu thực thể ngoài hoặc khôi phục đối tượng từ dữ liệu không tin cậy.",
+    "defense": "Tắt DTD và external entity; tránh định dạng đối tượng có khả năng thực thi.",
+    "url": "https://portswigger.net/web-security/xxe"
+  },
+  {
+    "id": "CSRF",
+    "name": "Cross Site Request Forgery",
+    "cwe": "CWE-352",
+    "mechanism": "Trình duyệt gửi yêu cầu thay đổi trạng thái mang thông tin xác thực tự động nhưng thiếu bằng chứng về ý định người dùng.",
+    "defense": "Token CSRF, kiểm tra Origin, SameSite phù hợp và không thay đổi trạng thái bằng GET.",
+    "url": "https://portswigger.net/web-security/csrf"
+  }
+]

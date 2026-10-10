@@ -1,0 +1,2 @@
+# No third-party Python package is required.
+# Python 3.10 or newer. Tested interpreter is recorded in evidence/validation.json.
