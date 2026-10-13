@@ -1,0 +1,121 @@
+name: CI
+
+# Static quality + security gates for the JuiceSec Analyzer itself.
+# We are scanning our own scanner: this is the "shift-left" half of the pipeline.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-gate:
+    name: Tests, evidence and quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Reproduce unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Regenerate evidence (tests, corpus, benchmark)
+        run: python evaluate.py
+
+      - name: Enforce quality thresholds against delivered baseline
+        # Baseline 1.0: F1 0.5946, precision 0.6111, recall 0.5789.
+        # Current engine (regex + AST/taint union) reaches F1 1.0 on both the
+        # delivered 40-item corpus and the 26-item holdout. The CI floors are
+        # set below those results so the gate catches regressions without
+        # turning red on harmless measurement noise.
+        run: |
+          python scan_gate.py \
+            --require-tests-pass \
+            --min-f1 0.85 \
+            --min-precision 0.85 \
+            --min-recall 0.85 \
+            --min-holdout-f1 0.85 \
+            --max-p95-ms 500
+
+      - name: Upload evidence artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence
+          path: evidence/
+          if-no-files-found: warn
+
+  static-security:
+    name: Static analysis of the scanner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install scanner tooling
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Bandit (Python security linter)
+        run: bandit -q -r juicesec app.py cli.py evaluate.py scan_gate.py -ll
+
+      - name: Semgrep (multi-language SAST)
+        run: semgrep scan --config=p/python --config=p/owasp-top-ten --error --quiet
+
+      - name: Verify zero third-party runtime dependencies
+        run: |
+          python - <<'PY'
+          import pathlib
+          lines = [l.strip() for l in pathlib.Path("requirements.txt").read_text().splitlines()]
+          pkgs = [l for l in lines if l and not l.startswith("#")]
+          assert not pkgs, f"unexpected runtime dependencies: {pkgs}"
+          print("zero-dependency guarantee holds")
+          PY
+
+  secret-scan:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # gitleaks-action scans the full history for committed credentials.
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  container-scan:
+    name: Build image and scan for CVEs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build analyzer image
+        run: docker build -t juicesec-analyzer:${{ github.sha }} .
+
+      - name: Trivy image scan (fails on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: juicesec-analyzer:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+
+      - name: Smoke-test the built image
+        # The server intentionally binds to 127.0.0.1 and validates the Host
+        # header, so it cannot be reached through Docker port-forwarding.
+        # Validate it from inside the container's own network namespace.
+        run: |
+          docker run --detach --name juicesec juicesec-analyzer:${{ github.sha }} app.py --port 5000
+          sleep 3
+          docker exec juicesec python -c "import urllib.request,sys; r=urllib.request.urlopen('http://127.0.0.1:5000/api/session',timeout=5); sys.exit(0 if r.status==200 else 1)"
+          docker exec juicesec python -m unittest discover -s tests
+          docker stop juicesec && docker rm juicesec

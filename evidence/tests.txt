@@ -10,20 +10,31 @@ test_source_api (test_api.ApiTests.test_source_api) ... ok
 test_ui (test_api.ApiTests.test_ui) ... ok
 test_unknown_path (test_api.ApiTests.test_unknown_path) ... ok
 test_wrong_content_type (test_api.ApiTests.test_wrong_content_type) ... ok
+test_exploit_script_refuses_non_loopback (test_core.LabScriptTests.test_exploit_script_refuses_non_loopback) ... ok
+test_jwt_claims_decoded (test_core.LabScriptTests.test_jwt_claims_decoded) ... ok
+test_redaction_masks_jwt (test_core.LabScriptTests.test_redaction_masks_jwt) ... ok
+test_redaction_masks_sensitive_keys (test_core.LabScriptTests.test_redaction_masks_sensitive_keys) ... ok
+test_token_preview_truncated (test_core.LabScriptTests.test_token_preview_truncated) ... ok
 test_active_request_count (test_core.NetworkTests.test_active_request_count) ... ok
 test_baseline_request_count (test_core.NetworkTests.test_baseline_request_count) ... ok
 test_body_not_persisted (test_core.NetworkTests.test_body_not_persisted) ... ok
 test_cookie_redacted (test_core.NetworkTests.test_cookie_redacted) ... ok
 test_unknown_path_denied (test_core.NetworkTests.test_unknown_path_denied) ... ok
+test_benign_jwt_preview_not_flagged (test_core.RuleTests.test_benign_jwt_preview_not_flagged) ... ok
 test_directory_not_traversal (test_core.RuleTests.test_directory_not_traversal) ... ok
 test_error_not_confirmed_sqli (test_core.RuleTests.test_error_not_confirmed_sqli) ... ok
+test_flow_engine_catches_alias (test_core.RuleTests.test_flow_engine_catches_alias) ... ok
+test_flow_engine_catches_intermediate_variable (test_core.RuleTests.test_flow_engine_catches_intermediate_variable) ... ok
+test_flow_engine_catches_multiline_sql (test_core.RuleTests.test_flow_engine_catches_multiline_sql) ... ok
 test_headers_missing (test_core.RuleTests.test_headers_missing) ... ok
 test_headers_present (test_core.RuleTests.test_headers_present) ... ok
 test_json_does_not_need_html_headers (test_core.RuleTests.test_json_does_not_need_html_headers) ... ok
+test_jwt_decode_for_authorization_flagged (test_core.RuleTests.test_jwt_decode_for_authorization_flagged) ... ok
 test_known_regex_false_negative (test_core.RuleTests.test_known_regex_false_negative) ... ok
-test_known_regex_false_positive (test_core.RuleTests.test_known_regex_false_positive) ... ok
 test_prometheus (test_core.RuleTests.test_prometheus) ... ok
+test_python_ast_engine_taint (test_core.RuleTests.test_python_ast_engine_taint) ... ok
 test_redirect_has_no_header_findings (test_core.RuleTests.test_redirect_has_no_header_findings) ... ok
+test_regex_false_positive_now_suppressed (test_core.RuleTests.test_regex_false_positive_now_suppressed) ... ok
 test_report_escaping (test_core.RuleTests.test_report_escaping) ... ok
 test_sast_limit (test_core.RuleTests.test_sast_limit) ... ok
 test_sast_line_number (test_core.RuleTests.test_sast_line_number) ... ok
@@ -33,6 +44,7 @@ test_sast_unicode_bytes (test_core.RuleTests.test_sast_unicode_bytes) ... ok
 test_sast_unsafe (test_core.RuleTests.test_sast_unsafe) ... ok
 test_spa_200_not_metrics (test_core.RuleTests.test_spa_200_not_metrics) ... ok
 test_spa_200_not_swagger (test_core.RuleTests.test_spa_200_not_swagger) ... ok
+test_static_string_sink_not_flagged (test_core.RuleTests.test_static_string_sink_not_flagged) ... ok
 test_swagger_marker (test_core.RuleTests.test_swagger_marker) ... ok
 test_forbidden_targets (test_core.TargetTests.test_forbidden_targets) ... ok
 test_ipv6 (test_core.TargetTests.test_ipv6) ... ok
@@ -40,6 +52,6 @@ test_localhost_pinned (test_core.TargetTests.test_localhost_pinned) ... ok
 test_loopback (test_core.TargetTests.test_loopback) ... ok
 
 ----------------------------------------------------------------------
-Ran 40 tests in 0.525s
+Ran 52 tests in 1.651s
 
 OK

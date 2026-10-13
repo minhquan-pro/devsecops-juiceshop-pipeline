@@ -1,0 +1,158 @@
+[
+  {
+    "id": "H-SQL-A",
+    "positive": true,
+    "source": "const clause = \"WHERE owner=\" + req.params.owner;\ndb.query(\"SELECT * FROM items \" + clause);",
+    "rationale": "Taint qua hai biến trung gian rồi ghép vào truy vấn."
+  },
+  {
+    "id": "H-SQL-B",
+    "positive": false,
+    "source": "db.execute(\"SELECT * FROM items WHERE owner = $1\", [ownerId]);",
+    "rationale": "Truy vấn tham số hóa với placeholder $1."
+  },
+  {
+    "id": "H-XSS-A",
+    "positive": true,
+    "source": "const banner = req.headers[\"x-banner\"];\nel.innerHTML = banner;",
+    "rationale": "Nguồn từ header chảy vào HTML sink."
+  },
+  {
+    "id": "H-XSS-B",
+    "positive": false,
+    "source": "el.innerHTML = \"<p>Loading…</p>\";",
+    "rationale": "Chuỗi tĩnh, không có nguồn không tin cậy."
+  },
+  {
+    "id": "H-XSS-C",
+    "positive": true,
+    "source": "const p = location.hash.slice(1);\ndocument.write(p);",
+    "rationale": "Nguồn URL chảy vào document.write."
+  },
+  {
+    "id": "H-CMD-A",
+    "positive": true,
+    "source": "const host = req.query.host;\nchild_process.exec(\"ping -c1 \" + host);",
+    "rationale": "Tham số request ghép vào lệnh shell."
+  },
+  {
+    "id": "H-CMD-B",
+    "positive": false,
+    "source": "child_process.execFile(\"/bin/ping\", [\"-c1\", host]);",
+    "rationale": "execFile nhận mảng tham số, không qua shell."
+  },
+  {
+    "id": "H-PATH-A",
+    "positive": true,
+    "source": "const name = req.params.name;\nres.sendFile(\"/data/\" + name);",
+    "rationale": "Đường dẫn ghép từ tham số request."
+  },
+  {
+    "id": "H-PATH-B",
+    "positive": false,
+    "source": "res.sendFile(path.join(PUBLIC_DIR, mappedId));",
+    "rationale": "Đường dẫn dựng từ ID đã ánh xạ trong thư mục cố định."
+  },
+  {
+    "id": "H-SSRF-A",
+    "positive": true,
+    "source": "const next = req.body.next;\nfetch(next);",
+    "rationale": "Đích HTTP lấy từ body request."
+  },
+  {
+    "id": "H-SSRF-B",
+    "positive": false,
+    "source": "fetch(\"https://api.internal/health\");",
+    "rationale": "Đích cố định."
+  },
+  {
+    "id": "H-DES-A",
+    "positive": true,
+    "source": "payload = request.data\nobj = pickle.loads(payload)",
+    "rationale": "Dữ liệu request giải tuần tự hóa qua biến trung gian."
+  },
+  {
+    "id": "H-DES-B",
+    "positive": false,
+    "source": "obj = json.loads(request.body)",
+    "rationale": "JSON không phục hồi đối tượng có phương thức."
+  },
+  {
+    "id": "H-JWT-A",
+    "positive": true,
+    "source": "const claims = jwt.decode(token);\nif (claims.role === \"admin\") grant();",
+    "rationale": "Cấp quyền dựa trên claim chưa xác minh."
+  },
+  {
+    "id": "H-JWT-B",
+    "positive": false,
+    "source": "const claims = jwt.verify(token, pubKey, {algorithms:[\"RS256\"]});\nallow(claims.role);",
+    "rationale": "Chữ ký và thuật toán được xác minh trước khi dùng claim."
+  },
+  {
+    "id": "H-BAC-A",
+    "positive": true,
+    "source": "const order = await Order.findById(req.params.id);\nreturn res.json(order);",
+    "rationale": "Truy vấn theo ID không ràng buộc chủ sở hữu."
+  },
+  {
+    "id": "H-BAC-B",
+    "positive": false,
+    "source": "const order = await Order.findOne({where:{id:req.params.id,UserId:req.user.id}});",
+    "rationale": "Ràng buộc chủ sở hữu trong truy vấn."
+  },
+  {
+    "id": "H-CSRF-A",
+    "positive": true,
+    "source": "router.get(\"/profile/delete\", cookieAuth, deleteProfile);",
+    "rationale": "Thay đổi trạng thái (xóa) qua GET."
+  },
+  {
+    "id": "H-CSRF-B",
+    "positive": false,
+    "source": "router.post(\"/profile/delete\", cookieAuth, csrfMiddleware, deleteProfile);",
+    "rationale": "POST kèm middleware CSRF."
+  },
+  {
+    "id": "H-TRUST-A",
+    "positive": true,
+    "source": "this.html = sanitizer.bypassSecurityTrustHtml(req.query.doc);",
+    "rationale": "Bỏ qua làm sạch của framework với dữ liệu request."
+  },
+  {
+    "id": "H-TRUST-B",
+    "positive": false,
+    "source": "this.html = sanitizer.sanitize(SecurityContext.HTML, value);",
+    "rationale": "Làm sạch theo ngữ cảnh."
+  },
+  {
+    "id": "H-XXE-A",
+    "positive": true,
+    "source": "parser = XMLParser(resolve_entities=True)\ndata = parser.parse(request.data)",
+    "rationale": "Bật thực thể ngoài khi parse XML từ request."
+  },
+  {
+    "id": "H-XXE-B",
+    "positive": false,
+    "source": "parser = XMLParser(resolve_entities=False, load_dtd=False)",
+    "rationale": "Tắt thực thể ngoài và DTD."
+  },
+  {
+    "id": "H-EVAL-A",
+    "positive": true,
+    "source": "const expr = req.body.formula;\neval(expr);",
+    "rationale": "Biểu thức request thực thi qua eval."
+  },
+  {
+    "id": "H-SAFE-A",
+    "positive": false,
+    "source": "const rows = items.filter(x => x.active).map(x => x.name);",
+    "rationale": "Biến đổi dữ liệu, không có sink bảo mật."
+  },
+  {
+    "id": "H-SAFE-B",
+    "positive": false,
+    "source": "await cache.set(\"key\", computeChecksum(buffer));",
+    "rationale": "Tính toán nội bộ, không có nguồn không tin cậy."
+  }
+]

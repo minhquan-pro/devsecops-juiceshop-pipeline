@@ -1,0 +1,65 @@
+name: DAST
+
+# Dynamic half of the pipeline: stand up a REAL OWASP Juice Shop target,
+# run the analyzer against it, execute the controlled exploit scenarios and
+# archive the evidence. This closes the gap where the report described Juice
+# Shop experiments that had never actually been executed.
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly regression run so the lab target and measurements stay honest.
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  dast-juice-shop:
+    name: Scan and exploit the local Juice Shop lab
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Start OWASP Juice Shop (loopback only)
+        run: |
+          docker compose up -d
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then break; fi
+            sleep 2
+          done
+          curl -fsS -o /dev/null -w "juice-shop HTTP %{http_code}\n" http://127.0.0.1:3000/
+
+      - name: Record target provenance (image digest, versions)
+        run: |
+          mkdir -p evidence
+          docker image inspect bkimminich/juice-shop:v15.0.0 \
+            --format '{{json .RepoDigests}} {{json .Id}}' > evidence/juice-image.json
+          docker --version > evidence/juice-image.json.txt
+          cat evidence/juice-image.json
+
+      - name: Baseline scan (passive, 5 fixed paths)
+        run: python cli.py --target http://127.0.0.1:3000 --out evidence/juice-baseline.json
+
+      - name: Active error probe (adds one SQL syntax probe)
+        run: python cli.py --target http://127.0.0.1:3000 --active --out evidence/juice-error-probe.json
+
+      - name: Controlled exploit scenarios (SQLi login, IDOR basket, JWT)
+        run: python labs/juice_shop_exploits.py --target http://127.0.0.1:3000 --out evidence/juice-exploits.json
+
+      - name: Redact before publishing evidence
+        run: python labs/redact_evidence.py evidence/
+
+      - name: Upload Juice Shop evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: juice-shop-evidence
+          path: evidence/
+          if-no-files-found: warn
+
+      - name: Tear down the lab
+        if: always()
+        run: docker compose down

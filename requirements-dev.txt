@@ -1,0 +1,5 @@
+# Development and CI tooling only. The runtime application stays zero-dependency.
+# Pin ranges so CI is reproducible while still picking up CVE fixes.
+bandit[toml]>=1.7,<2
+semgrep>=1.60,<2
+pip-audit>=2.7,<3

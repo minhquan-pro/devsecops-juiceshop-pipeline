@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "mode": "active_error_probe",
-  "target": "http://127.0.0.1:43959",
-  "generated_at": "2026-10-09T04:51:01.386153+00:00",
-  "duration_ms": 3.37,
+  "target": "http://127.0.0.1:58957",
+  "generated_at": "2026-10-13T04:04:25.212929+00:00",
+  "duration_ms": 66.178,
   "findings": [
     {
       "rule_id": "HDR-content-security-policy",
@@ -79,7 +79,7 @@
       "truncated": false,
       "sha256_prefix": "a1b5f9836b8342e8681a4e76f2a59e3ac55521858c7d55e11d3987112b5f7dcf",
       "bytes_captured": 37,
-      "elapsed_ms": 0.455
+      "elapsed_ms": 15.473
     },
     {
       "path": "/rest/products/search?q=juice",
@@ -87,7 +87,7 @@
       "truncated": false,
       "sha256_prefix": "8fe32e407a1038ee38753b70e5374b3a46d6ae9d5f16cd5b73c53abaca8f5ed0",
       "bytes_captured": 11,
-      "elapsed_ms": 0.309
+      "elapsed_ms": 15.452
     },
     {
       "path": "/api-docs/",
@@ -95,7 +95,7 @@
       "truncated": false,
       "sha256_prefix": "a1b5f9836b8342e8681a4e76f2a59e3ac55521858c7d55e11d3987112b5f7dcf",
       "bytes_captured": 37,
-      "elapsed_ms": 0.357
+      "elapsed_ms": 15.648
     },
     {
       "path": "/metrics",
@@ -103,7 +103,7 @@
       "truncated": false,
       "sha256_prefix": "cd859768e2fab477b96fa31dac4c0474ae071f1bde5a716222467f6159e8326c",
       "bytes_captured": 73,
-      "elapsed_ms": 0.731
+      "elapsed_ms": 2.376
     },
     {
       "path": "/ftp/",
@@ -111,7 +111,7 @@
       "truncated": false,
       "sha256_prefix": "1b5a746c99154f05a9be1f8e506f82c900964f58816a083e4b6aaf0c21c6161d",
       "bytes_captured": 71,
-      "elapsed_ms": 0.464
+      "elapsed_ms": 12.35
     },
     {
       "path": "/rest/products/search?q=%27",
@@ -119,7 +119,7 @@
       "truncated": false,
       "sha256_prefix": "63a58f2b4cdeb081801b577a3dcf6b7627fab961bfcd91fed2050d73d5ffe029",
       "bytes_captured": 42,
-      "elapsed_ms": 0.411
+      "elapsed_ms": 2.631
     }
   ],
   "errors": [],

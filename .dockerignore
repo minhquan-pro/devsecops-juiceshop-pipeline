@@ -1,0 +1,15 @@
+# Keep the build context small and free of secrets/artifacts.
+.git
+.github
+__pycache__
+**/__pycache__
+*.pyc
+.venv
+venv
+.DS_Store
+*.docx
+*.pdf
+BAO_CAO_BTL_ATTT_JUICE_SHOP.md
+sample_report_content.txt
+SCRIPT_THUYT_TRINH_BTL.txt
+HUONG_DAN_GOI_BAN_GIAO.md

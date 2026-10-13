@@ -1,0 +1,97 @@
+<!doctype html><html lang='vi'><meta charset='utf-8'><meta http-equiv='Content-Security-Policy' content="default-src 'none'; style-src 'unsafe-inline'"><title>JuiceSec report</title><style>body{font:16px system-ui;margin:40px;line-height:1.5}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bbb;padding:8px;text-align:left;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><h1>Báo cáo JuiceSec Analyzer</h1><p>Cảnh báo cần thẩm định; dữ liệu này không tự xác nhận khai thác.</p><p>Đích: http://127.0.0.1:3000</p><table><tr><th>Quy tắc</th><th>Tiêu đề</th><th>Mức độ</th><th>Tin cậy</th><th>Trạng thái</th><th>Bằng chứng</th><th>Khắc phục</th></tr><tr><td>HDR-content-security-policy</td><td>Thiếu Content Security Policy</td><td>low</td><td>high</td><td>needs_review</td><td>Không thấy header trên HTML gốc; không suy ra XSS.</td><td>Đánh giá chính sách theo ngữ cảnh và kiểm thử hồi quy.</td></tr><tr><td>INFO-API</td><td>Phát hiện tài liệu API</td><td>info</td><td>medium</td><td>needs_review</td><td>Tài liệu API có thể được công bố có chủ đích; chưa đủ kết luận lộ dữ liệu.</td><td>Kiểm tra chính sách công bố và loại bỏ ví dụ chứa bí mật.</td></tr><tr><td>INFO-METRICS</td><td>Endpoint xuất dữ liệu đo lường</td><td>low</td><td>high</td><td>needs_review</td><td>Nội dung có cấu trúc Prometheus; cần kiểm tra dữ liệu và quyền truy cập.</td><td>Tách mạng quản trị hoặc kiểm soát quyền đọc metrics.</td></tr></table><h2>Dữ liệu và giới hạn</h2><pre>{
+  &quot;schema_version&quot;: &quot;1.0&quot;,
+  &quot;mode&quot;: &quot;active_error_probe&quot;,
+  &quot;target&quot;: &quot;http://127.0.0.1:3000&quot;,
+  &quot;generated_at&quot;: &quot;2026-10-13T03:38:32.829584+00:00&quot;,
+  &quot;duration_ms&quot;: 3168.222,
+  &quot;findings&quot;: [
+    {
+      &quot;rule_id&quot;: &quot;HDR-content-security-policy&quot;,
+      &quot;title&quot;: &quot;Thiếu Content Security Policy&quot;,
+      &quot;severity&quot;: &quot;low&quot;,
+      &quot;confidence&quot;: &quot;high&quot;,
+      &quot;status&quot;: &quot;needs_review&quot;,
+      &quot;cwe&quot;: &quot;CWE-693&quot;,
+      &quot;evidence&quot;: &quot;Không thấy header trên HTML gốc; không suy ra XSS.&quot;,
+      &quot;remediation&quot;: &quot;Đánh giá chính sách theo ngữ cảnh và kiểm thử hồi quy.&quot;,
+      &quot;path&quot;: &quot;/&quot;
+    },
+    {
+      &quot;rule_id&quot;: &quot;INFO-API&quot;,
+      &quot;title&quot;: &quot;Phát hiện tài liệu API&quot;,
+      &quot;severity&quot;: &quot;info&quot;,
+      &quot;confidence&quot;: &quot;medium&quot;,
+      &quot;status&quot;: &quot;needs_review&quot;,
+      &quot;cwe&quot;: &quot;CWE-200&quot;,
+      &quot;evidence&quot;: &quot;Tài liệu API có thể được công bố có chủ đích; chưa đủ kết luận lộ dữ liệu.&quot;,
+      &quot;remediation&quot;: &quot;Kiểm tra chính sách công bố và loại bỏ ví dụ chứa bí mật.&quot;,
+      &quot;path&quot;: &quot;/api-docs/&quot;
+    },
+    {
+      &quot;rule_id&quot;: &quot;INFO-METRICS&quot;,
+      &quot;title&quot;: &quot;Endpoint xuất dữ liệu đo lường&quot;,
+      &quot;severity&quot;: &quot;low&quot;,
+      &quot;confidence&quot;: &quot;high&quot;,
+      &quot;status&quot;: &quot;needs_review&quot;,
+      &quot;cwe&quot;: &quot;CWE-200&quot;,
+      &quot;evidence&quot;: &quot;Nội dung có cấu trúc Prometheus; cần kiểm tra dữ liệu và quyền truy cập.&quot;,
+      &quot;remediation&quot;: &quot;Tách mạng quản trị hoặc kiểm soát quyền đọc metrics.&quot;,
+      &quot;path&quot;: &quot;/metrics&quot;
+    }
+  ],
+  &quot;records&quot;: [
+    {
+      &quot;path&quot;: &quot;/&quot;,
+      &quot;status&quot;: 200,
+      &quot;truncated&quot;: false,
+      &quot;sha256_prefix&quot;: &quot;2d156b45cb381b5d6aad101e2d6425ff46b9d995ec5e82cd2b8e18260e661c4e&quot;,
+      &quot;bytes_captured&quot;: 1987,
+      &quot;elapsed_ms&quot;: 32.587
+    },
+    {
+      &quot;path&quot;: &quot;/rest/products/search?q=juice&quot;,
+      &quot;status&quot;: 200,
+      &quot;truncated&quot;: false,
+      &quot;sha256_prefix&quot;: &quot;2da93397a0abd512e1d1aa9d5588099905282047f50b52ef023564ea72317d6a&quot;,
+      &quot;bytes_captured&quot;: 10056,
+      &quot;elapsed_ms&quot;: 62.835
+    },
+    {
+      &quot;path&quot;: &quot;/api-docs/&quot;,
+      &quot;status&quot;: 200,
+      &quot;truncated&quot;: false,
+      &quot;sha256_prefix&quot;: &quot;3d1f21ff983b7b71c5cf152d3134374ba8a0050ddbd97a9cb1b4b8cfb9d308b2&quot;,
+      &quot;bytes_captured&quot;: 3106,
+      &quot;elapsed_ms&quot;: 3.648
+    },
+    {
+      &quot;path&quot;: &quot;/metrics&quot;,
+      &quot;status&quot;: 200,
+      &quot;truncated&quot;: false,
+      &quot;sha256_prefix&quot;: &quot;07a45d711fe96ec200d150ce95dedce33c1ebb0d0579b0b441156c4bf846292b&quot;,
+      &quot;bytes_captured&quot;: 23553,
+      &quot;elapsed_ms&quot;: 6.112
+    },
+    {
+      &quot;path&quot;: &quot;/rest/products/search?q=%27&quot;,
+      &quot;status&quot;: 200,
+      &quot;truncated&quot;: false,
+      &quot;sha256_prefix&quot;: &quot;20bc1392a17b383b46fffc33c8e796755452883bfcfc2d33c90342ea70227639&quot;,
+      &quot;bytes_captured&quot;: 30,
+      &quot;elapsed_ms&quot;: 38.731
+    }
+  ],
+  &quot;errors&quot;: [
+    {
+      &quot;path&quot;: &quot;/ftp/&quot;,
+      &quot;type&quot;: &quot;TimeoutError&quot;,
+      &quot;message&quot;: &quot;timed out&quot;
+    }
+  ],
+  &quot;limits&quot;: [
+    &quot;Heuristics, not exploit confirmation&quot;,
+    &quot;No browser execution&quot;,
+    &quot;No authenticated access-control testing&quot;,
+    &quot;No CVSS auto-scoring&quot;
+  ]
+}</pre></html>

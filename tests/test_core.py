@@ -1,9 +1,15 @@
 import json
 import threading
+import subprocess
+import sys
 import unittest
 from http.server import ThreadingHTTPServer
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from juicesec.core import target_address, analyze_response, analyze_source, html_report, collect, scan
 from tests.fixture_server import Fixture
+
 
 
 def record(path="/", body="", headers=None, status=200):
@@ -50,10 +56,33 @@ class RuleTests(unittest.TestCase):
     def test_report_escaping(self):
         report=html_report({"target":"<img src=x onerror=alert(1)>","findings":[]})
         self.assertNotIn("<img",report); self.assertIn("&lt;img",report)
-    def test_known_regex_false_positive(self):
-        self.assertTrue(analyze_source("// example only: node.innerHTML = user;"))
+    def test_regex_false_positive_now_suppressed(self):
+        # Comment-only lines are inert; the AST engine plus the comment filter
+        # suppress the old line-regex false positive.
+        self.assertFalse(analyze_source("// example only: node.innerHTML = user;"))
     def test_known_regex_false_negative(self):
         self.assertFalse(analyze_source("const sink = 'inner' + 'HTML'; node[sink] = input;"))
+    def test_static_string_sink_not_flagged(self):
+        # A fixed HTML literal is not attacker-controlled.
+        self.assertFalse(analyze_source('node.innerHTML = "<strong>Fixed label</strong>";'))
+    def test_flow_engine_catches_intermediate_variable(self):
+        # Source assigned to a variable, then used as a sink on a later line.
+        findings=analyze_source("const file = req.query.file;\nfs.readFile(file, handler);")
+        self.assertTrue(any(f["rule_id"]=="SAST-AST-PATH" for f in findings))
+    def test_flow_engine_catches_multiline_sql(self):
+        findings=analyze_source('const q = "SELECT id FROM Users WHERE email=";\nconst final = q + input;\ndb.query(final);')
+        self.assertTrue(any(f["rule_id"]=="SAST-AST-SQL" for f in findings))
+    def test_flow_engine_catches_alias(self):
+        findings=analyze_source("loader = pickle.loads; obj = loader(request.body)")
+        self.assertTrue(any(f["rule_id"]=="SAST-AST-DESER" for f in findings))
+    def test_python_ast_engine_taint(self):
+        findings=analyze_source("path = request.args['f']\nopen(path)", "sample.py")
+        self.assertTrue(any(f["rule_id"]=="SAST-AST-PATH" for f in findings))
+    def test_benign_jwt_preview_not_flagged(self):
+        self.assertFalse(analyze_source("const preview = jwt.decode(token); showDebugOnly(preview);"))
+    def test_jwt_decode_for_authorization_flagged(self):
+        self.assertTrue(analyze_source("const user = jwt.decode(token); allow(user.role);"))
+
 
 
 class NetworkTests(unittest.TestCase):
@@ -74,4 +103,41 @@ class NetworkTests(unittest.TestCase):
         data=scan(self.url); self.assertTrue(all("body" not in r for r in data["records"])); self.assertNotIn("do_not_export",json.dumps(data))
 
 
+
+class LabScriptTests(unittest.TestCase):
+    """Checks for the real-exploit and redaction helpers in labs/."""
+
+    def test_redaction_masks_jwt(self):
+        from labs.redact_evidence import redact_text
+        token=("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0."
+               "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+        self.assertEqual(redact_text(f"Bearer {token}"), "Bearer <jwt-redacted>")
+
+    def test_redaction_masks_sensitive_keys(self):
+        from labs.redact_evidence import redact_value
+        masked=redact_value({"token":"abc","email":"a@b.c","nested":{"password":"p"}})
+        self.assertEqual(masked["token"],"<redacted>")
+        self.assertEqual(masked["nested"]["password"],"<redacted>")
+        self.assertEqual(masked["email"],"a@b.c")
+
+    def test_jwt_claims_decoded(self):
+        from labs.juice_shop_exploits import _claims
+        token="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.x"
+        self.assertEqual(_claims(token).get("sub"),"1234567890")
+
+    def test_exploit_script_refuses_non_loopback(self):
+        root=Path(__file__).resolve().parents[1]
+        proc=subprocess.run([sys.executable,str(root/"labs"/"juice_shop_exploits.py"),
+                             "--target","http://192.0.2.10:3000"],
+                            capture_output=True,text=True)
+        self.assertNotEqual(proc.returncode,0)
+        self.assertIn("non-loopback",proc.stderr)
+
+    def test_token_preview_truncated(self):
+        from labs.juice_shop_exploits import _redact
+        self.assertTrue(_redact("x"*500).endswith("REDACTED"))
+        self.assertEqual(len(_redact("x"*500)),len("x"*12)+len("…REDACTED"))
+
+
 if __name__ == "__main__": unittest.main()
+

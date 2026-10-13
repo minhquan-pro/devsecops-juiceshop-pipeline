@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "mode": "active_error_probe",
+  "target": "http://127.0.0.1:3000",
+  "generated_at": "2026-10-13T03:38:32.829584+00:00",
+  "duration_ms": 3168.222,
+  "findings": [
+    {
+      "rule_id": "HDR-content-security-policy",
+      "title": "Thiếu Content Security Policy",
+      "severity": "low",
+      "confidence": "high",
+      "status": "needs_review",
+      "cwe": "CWE-693",
+      "evidence": "Không thấy header trên HTML gốc; không suy ra XSS.",
+      "remediation": "Đánh giá chính sách theo ngữ cảnh và kiểm thử hồi quy.",
+      "path": "/"
+    },
+    {
+      "rule_id": "INFO-API",
+      "title": "Phát hiện tài liệu API",
+      "severity": "info",
+      "confidence": "medium",
+      "status": "needs_review",
+      "cwe": "CWE-200",
+      "evidence": "Tài liệu API có thể được công bố có chủ đích; chưa đủ kết luận lộ dữ liệu.",
+      "remediation": "Kiểm tra chính sách công bố và loại bỏ ví dụ chứa bí mật.",
+      "path": "/api-docs/"
+    },
+    {
+      "rule_id": "INFO-METRICS",
+      "title": "Endpoint xuất dữ liệu đo lường",
+      "severity": "low",
+      "confidence": "high",
+      "status": "needs_review",
+      "cwe": "CWE-200",
+      "evidence": "Nội dung có cấu trúc Prometheus; cần kiểm tra dữ liệu và quyền truy cập.",
+      "remediation": "Tách mạng quản trị hoặc kiểm soát quyền đọc metrics.",
+      "path": "/metrics"
+    }
+  ],
+  "records": [
+    {
+      "path": "/",
+      "status": 200,
+      "truncated": false,
+      "sha256_prefix": "2d156b45cb381b5d6aad101e2d6425ff46b9d995ec5e82cd2b8e18260e661c4e",
+      "bytes_captured": 1987,
+      "elapsed_ms": 32.587
+    },
+    {
+      "path": "/rest/products/search?q=juice",
+      "status": 200,
+      "truncated": false,
+      "sha256_prefix": "2da93397a0abd512e1d1aa9d5588099905282047f50b52ef023564ea72317d6a",
+      "bytes_captured": 10056,
+      "elapsed_ms": 62.835
+    },
+    {
+      "path": "/api-docs/",
+      "status": 200,
+      "truncated": false,
+      "sha256_prefix": "3d1f21ff983b7b71c5cf152d3134374ba8a0050ddbd97a9cb1b4b8cfb9d308b2",
+      "bytes_captured": 3106,
+      "elapsed_ms": 3.648
+    },
+    {
+      "path": "/metrics",
+      "status": 200,
+      "truncated": false,
+      "sha256_prefix": "07a45d711fe96ec200d150ce95dedce33c1ebb0d0579b0b441156c4bf846292b",
+      "bytes_captured": 23553,
+      "elapsed_ms": 6.112
+    },
+    {
+      "path": "/rest/products/search?q=%27",
+      "status": 200,
+      "truncated": false,
+      "sha256_prefix": "20bc1392a17b383b46fffc33c8e796755452883bfcfc2d33c90342ea70227639",
+      "bytes_captured": 30,
+      "elapsed_ms": 38.731
+    }
+  ],
+  "errors": [
+    {
+      "path": "/ftp/",
+      "type": "TimeoutError",
+      "message": "timed out"
+    }
+  ],
+  "limits": [
+    "Heuristics, not exploit confirmation",
+    "No browser execution",
+    "No authenticated access-control testing",
+    "No CVSS auto-scoring"
+  ]
+}

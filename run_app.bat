@@ -8,5 +8,5 @@ echo ============================================================
 echo.
 echo Dang khoi dong may chu phan tich tai http://127.0.0.1:5000...
 start http://127.0.0.1:5000
-python app\server.py 5000
+python app.py
 pause

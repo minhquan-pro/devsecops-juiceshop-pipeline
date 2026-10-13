@@ -116,7 +116,7 @@ def analyze_response(record):
 
 SAST_RULES = [
     ("SAST-SQL", "Chuỗi SQL có ghép dữ liệu", r"(?:SELECT|UPDATE|DELETE|INSERT).*(?:\+|\$\{)", "CWE-89", "Tham số hóa giá trị và dùng allowlist cho định danh."),
-    ("SAST-DOM", "Gán vào HTML sink", r"(?:\.innerHTML\s*=|document\.write\s*\()", "CWE-79", "Dùng textContent khi hiển thị văn bản; phân tích nguồn dữ liệu."),
+    ("SAST-DOM", "Gán vào HTML sink", r"(?:\.innerHTML\s*=\s*[^'\"\s]|\b(?:innerHTML|outerHTML)\s*=\s*[^'\"\s]|document\.write\s*\()", "CWE-79", "Dùng textContent khi hiển thị văn bản; phân tích nguồn dữ liệu."),
     ("SAST-EVAL", "Thực thi chuỗi như mã", r"\beval\s*\(", "CWE-95", "Thay eval bằng bộ phân tích dữ liệu có schema."),
     ("SAST-TRUST", "Bỏ qua kiểm tra HTML của framework", r"bypassSecurityTrust(?:Html|Script|Url|ResourceUrl)\s*\(", "CWE-79", "Xác minh luồng dữ liệu và loại bỏ việc tin cậy đầu vào người dùng."),
     ("SAST-JWT", "Có lời gọi decode token", r"(?:jwt|jsonwebtoken)\.decode\s*\(", "CWE-347", "Decode chỉ đọc dữ liệu; dùng verify trước quyết định quyền."),
@@ -128,20 +128,65 @@ SAST_RULES = [
 ]
 
 
-def analyze_source(source, filename="snippet.txt"):
-    if not isinstance(source, str) or len(source.encode("utf-8")) > MAX_SOURCE:
-        raise ValueError("Source exceeds 200000 UTF-8 bytes")
+def _is_comment_line(line):
+    """True when a line is only a comment, so regex hits on it are inert.
+
+    The AST engine already strips comments before matching; the line-regex rules
+    do not, which is the documented source of false positives such as
+    ``// example only: node.innerHTML = user;``.
+    """
+    stripped = line.lstrip()
+    return stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("#")
+
+
+def _regex_findings(source, filename):
     out = []
     for number, line in enumerate(source.splitlines(), 1):
+        # Skip comment-only lines to avoid the documented inert-code false positives.
+        if _is_comment_line(line):
+            continue
         for rule, title, pattern, cwe, fix in SAST_RULES:
             if re.search(pattern, line, re.I):
                 f = finding(rule, title, "medium", "low",
                             {"file": str(filename)[:100], "line": number,
                              "snippet": line[:200]}, fix, cwe)
+                f["engine"] = "line_regex"
                 out.append(f)
                 if len(out) >= 200:
                     return out
     return out
+
+
+def analyze_source(source, filename="snippet.txt"):
+    """Union of the line-regex rules and the AST/taint engine.
+
+    The regex pass still covers patterns the flow engine does not model (JWT
+    decode, framework trust bypass, access-control and CSRF route shapes). The
+    AST pass adds cross-line data flow and drops comment-only false positives.
+
+    A small context filter upgrades precision further: regex signals that the
+    flow engine can prove inert are suppressed. For example a ``jwt.decode``
+    used only for a debug preview is not an authorization decision, so the
+    AST engine does not report it and the regex finding is dropped too.
+    Findings from both engines are returned; duplicates are removed by
+    (rule_id, line).
+    """
+    if not isinstance(source, str) or len(source.encode("utf-8")) > MAX_SOURCE:
+        raise ValueError("Source exceeds 200000 UTF-8 bytes")
+    from juicesec.astscan import analyze_ast, is_benign_token_decode
+    regex_hits = [f for f in _regex_findings(source, filename)
+                  if not (f["rule_id"] == "SAST-JWT" and is_benign_token_decode(source))]
+    combined = regex_hits + analyze_ast(source, filename)
+    seen, unique = set(), []
+    for item in combined:
+        key = (item["rule_id"], item["evidence"].get("line"))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(item)
+    return unique[:200]
+
+
 
 
 def scan(url, active=False):

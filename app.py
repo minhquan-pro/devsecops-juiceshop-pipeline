@@ -94,9 +94,10 @@ class Handler(BaseHTTPRequestHandler):
                 finally:
                     SCAN_LOCK.release()
             elif path == "/api/source":
-                report = {"schema_version": "1.0", "mode": "sast_heuristic", "target": "submitted source",
+                report = {"schema_version": "1.1", "mode": "sast_regex_ast_union", "target": "submitted source",
                           "findings": analyze_source(data.get("source", ""), data.get("filename", "snippet.txt")),
-                          "limits": ["Line regex only; no AST, taint or exploit confirmation"]}
+                          "limits": ["Static flow analysis only; no exploit confirmation",
+                                     "Findings carry status needs_review until an analyst validates them"]}
             else:
                 return self.json_data(404, {"error": "Not found"})
             with REPORT_LOCK:

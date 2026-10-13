@@ -24,20 +24,20 @@
     "positive": true,
     "source": "const q = \"SELECT id FROM Users WHERE email=\";\nconst final = q + input;\ndb.query(final);",
     "rationale": "Nối chuỗi qua nhiều dòng nên regex một dòng bỏ sót.",
-    "predicted": false,
-    "category": "fn",
-    "rule_ids": []
+    "predicted": true,
+    "category": "tp",
+    "rule_ids": [
+      "SAST-AST-SQL"
+    ]
   },
   {
     "id": "SQL04",
     "positive": false,
     "source": "// Example to avoid: SELECT * FROM Users WHERE id= + input",
     "rationale": "Chuỗi nằm trong chú thích, không được thực thi.",
-    "predicted": true,
-    "category": "fp",
-    "rule_ids": [
-      "SAST-SQL"
-    ]
+    "predicted": false,
+    "category": "tn",
+    "rule_ids": []
   },
   {
     "id": "XSS01",
@@ -47,7 +47,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-DOM"
+      "SAST-DOM",
+      "SAST-AST-XSS"
     ]
   },
   {
@@ -64,20 +65,20 @@
     "positive": true,
     "source": "node[\"inner\"+\"HTML\"] = req.query.name;",
     "rationale": "Tên thuộc tính dựng động vượt regex.",
-    "predicted": false,
-    "category": "fn",
-    "rule_ids": []
+    "predicted": true,
+    "category": "tp",
+    "rule_ids": [
+      "SAST-AST-XSS"
+    ]
   },
   {
     "id": "XSS04",
     "positive": false,
     "source": "node.innerHTML = \"<strong>Fixed label</strong>\";",
     "rationale": "Nguồn cố định không có dữ liệu không tin cậy.",
-    "predicted": true,
-    "category": "fp",
-    "rule_ids": [
-      "SAST-DOM"
-    ]
+    "predicted": false,
+    "category": "tn",
+    "rule_ids": []
   },
   {
     "id": "XSS05",
@@ -87,7 +88,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-DOM"
+      "SAST-DOM",
+      "SAST-AST-XSS"
     ]
   },
   {
@@ -95,11 +97,9 @@
     "positive": false,
     "source": "// document.write(location.hash) is forbidden here",
     "rationale": "Ví dụ trong chú thích tạo cảnh báo giả.",
-    "predicted": true,
-    "category": "fp",
-    "rule_ids": [
-      "SAST-DOM"
-    ]
+    "predicted": false,
+    "category": "tn",
+    "rule_ids": []
   },
   {
     "id": "JWT01",
@@ -109,7 +109,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-JWT"
+      "SAST-JWT",
+      "SAST-AST-JWT"
     ]
   },
   {
@@ -126,20 +127,20 @@
     "positive": false,
     "source": "const preview = jwt.decode(token); showDebugOnly(preview);",
     "rationale": "Decode để xem trước, không cấp quyền.",
-    "predicted": true,
-    "category": "fp",
-    "rule_ids": [
-      "SAST-JWT"
-    ]
+    "predicted": false,
+    "category": "tn",
+    "rule_ids": []
   },
   {
     "id": "JWT04",
     "positive": true,
     "source": "const user = decodeTokenWithoutVerification(token); allow(user.role);",
     "rationale": "Hàm wrapper không nằm trong mẫu regex.",
-    "predicted": false,
-    "category": "fn",
-    "rule_ids": []
+    "predicted": true,
+    "category": "tp",
+    "rule_ids": [
+      "SAST-AST-JWT"
+    ]
   },
   {
     "id": "CMD01",
@@ -149,7 +150,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-EXEC"
+      "SAST-EXEC",
+      "SAST-AST-CMD"
     ]
   },
   {
@@ -166,11 +168,9 @@
     "positive": false,
     "source": "// child_process.exec(userCommand) is unsafe",
     "rationale": "Chú thích không thực thi.",
-    "predicted": true,
-    "category": "fp",
-    "rule_ids": [
-      "SAST-EXEC"
-    ]
+    "predicted": false,
+    "category": "tn",
+    "rule_ids": []
   },
   {
     "id": "PATH01",
@@ -180,7 +180,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-PATH"
+      "SAST-PATH",
+      "SAST-AST-PATH"
     ]
   },
   {
@@ -197,9 +198,11 @@
     "positive": true,
     "source": "const file = req.query.file; fs.readFile(file, handler);",
     "rationale": "Biến trung gian làm mất dấu nguồn ở regex.",
-    "predicted": false,
-    "category": "fn",
-    "rule_ids": []
+    "predicted": true,
+    "category": "tp",
+    "rule_ids": [
+      "SAST-AST-PATH"
+    ]
   },
   {
     "id": "SSRF01",
@@ -209,7 +212,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-SSRF"
+      "SAST-SSRF",
+      "SAST-AST-SSRF"
     ]
   },
   {
@@ -226,9 +230,11 @@
     "positive": true,
     "source": "const dest=req.body.url; axios.get(dest);",
     "rationale": "Đích qua biến trung gian bị bỏ sót.",
-    "predicted": false,
-    "category": "fn",
-    "rule_ids": []
+    "predicted": true,
+    "category": "tp",
+    "rule_ids": [
+      "SAST-AST-SSRF"
+    ]
   },
   {
     "id": "XXE01",
@@ -255,11 +261,9 @@
     "positive": false,
     "source": "# Never enable resolve_entities=True in this project",
     "rationale": "Chú thích làm regex dương tính giả.",
-    "predicted": true,
-    "category": "fp",
-    "rule_ids": [
-      "SAST-XML"
-    ]
+    "predicted": false,
+    "category": "tn",
+    "rule_ids": []
   },
   {
     "id": "DES01",
@@ -269,7 +273,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-DESER"
+      "SAST-DESER",
+      "SAST-AST-DESER"
     ]
   },
   {
@@ -286,9 +291,11 @@
     "positive": true,
     "source": "loader = pickle.loads; obj = loader(request.body)",
     "rationale": "Alias hàm vượt regex.",
-    "predicted": false,
-    "category": "fn",
-    "rule_ids": []
+    "predicted": true,
+    "category": "tp",
+    "rule_ids": [
+      "SAST-AST-DESER"
+    ]
   },
   {
     "id": "EVAL01",
@@ -298,7 +305,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-EVAL"
+      "SAST-EVAL",
+      "SAST-AST-EVAL"
     ]
   },
   {
@@ -315,9 +323,11 @@
     "positive": true,
     "source": "return Basket.findByPk(req.params.id);",
     "rationale": "Corpus giả định không có middleware kiểm tra chủ sở hữu.",
-    "predicted": false,
-    "category": "fn",
-    "rule_ids": []
+    "predicted": true,
+    "category": "tp",
+    "rule_ids": [
+      "SAST-AST-BAC"
+    ]
   },
   {
     "id": "BAC02",
@@ -333,9 +343,11 @@
     "positive": true,
     "source": "router.get(\"/change-name\", cookieAuth, updateName);",
     "rationale": "Corpus giả định GET thay đổi tên từ cookie mà không kiểm tra CSRF.",
-    "predicted": false,
-    "category": "fn",
-    "rule_ids": []
+    "predicted": true,
+    "category": "tp",
+    "rule_ids": [
+      "SAST-AST-CSRF"
+    ]
   },
   {
     "id": "CSRF02",
@@ -354,7 +366,8 @@
     "predicted": true,
     "category": "tp",
     "rule_ids": [
-      "SAST-TRUST"
+      "SAST-TRUST",
+      "SAST-AST-TRUST"
     ]
   },
   {
@@ -389,10 +402,8 @@
     "positive": false,
     "source": "// eval(input) is an example in a tutorial",
     "rationale": "Dòng chú thích dùng làm đối chứng âm.",
-    "predicted": true,
-    "category": "fp",
-    "rule_ids": [
-      "SAST-EVAL"
-    ]
+    "predicted": false,
+    "category": "tn",
+    "rule_ids": []
   }
 ]

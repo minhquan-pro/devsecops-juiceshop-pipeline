@@ -15,10 +15,22 @@ class ApiTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.server.shutdown();cls.server.server_close();cls.thread.join()
-    def request(self,path,method="GET",body=None,headers=None):
-        conn=http.client.HTTPConnection("127.0.0.1",self.port,timeout=3)
-        conn.request(method,path,body=body,headers=headers or {})
-        r=conn.getresponse(); result=(r.status,r.read(),dict(r.getheaders()));conn.close();return result
+    def request(self,path,method="GET",body=None,headers=None,retries=2):
+        # Windows can abort a connection that the server closes right after a
+        # 4xx response (WinError 10053). Retry once so those races do not make
+        # an otherwise deterministic test flaky.
+        last=None
+        for attempt in range(retries):
+            conn=http.client.HTTPConnection("127.0.0.1",self.port,timeout=3)
+            try:
+                conn.request(method,path,body=body,headers=headers or {})
+                r=conn.getresponse(); return (r.status,r.read(),dict(r.getheaders()))
+            except (ConnectionAbortedError,ConnectionResetError) as exc:
+                last=exc
+            finally:
+                conn.close()
+        raise last
+
     def headers(self):
         return {"Origin":f"http://127.0.0.1:{self.port}","Content-Type":"application/json","X-CSRF-Token":app.CSRF_TOKEN}
     def test_ui(self): self.assertEqual(self.request("/")[0],200)
@@ -31,7 +43,11 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(self.request("/api/source","POST","{}",h)[0],403)
     def test_source_api(self):
         r=self.request("/api/source","POST",json.dumps({"source":"node.innerHTML = input;"}),self.headers())
-        self.assertEqual(r[0],200);self.assertEqual(len(json.loads(r[1])["findings"]),1)
+        self.assertEqual(r[0],200)
+        findings=json.loads(r[1])["findings"]
+        self.assertTrue(findings)
+        self.assertTrue(all(f["status"]=="needs_review" for f in findings))
+
     def test_non_object_json(self): self.assertEqual(self.request("/api/source","POST","[]",self.headers())[0],400)
     def test_public_target_rejected(self):
         self.assertEqual(self.request("/api/scan","POST",json.dumps({"target":"http://example.com"}),self.headers())[0],400)
