@@ -1,0 +1,71 @@
+PHỤ LỤC C: BẢNG DỮ LIỆU ĐO LƯỜNG HIỆU NĂNG, LOGS HTTP VÀ BENCHMARK CHI TIẾT
+
+Toàn bộ nội dung dưới đây sinh trực tiếp từ thư mục evidence/ bằng labs/gen_report_appendices.py, nên khớp chính xác với artifact đã công bố của JuiceSec Analyzer 1.1.
+
+C.1 Validation Benchmark Results (validation.json)
+Trích xuất C.1 Validation Benchmark Results (validation.json):
+{
+  "generated_at": "2026-10-17T10:57:28.089842+00:00",
+  "python": "3.13.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "scope": "Synthetic fixtures only; Juice Shop not executed",
+  "engine": "line_regex + stdlib-AST taint union (see juicesec/astscan.py)",
+  "unit_tests": {
+    "run": 52,
+    "failures": 0,
+    "errors": 0,
+    "successful": true
+  },
+  "corpus": {
+    "count": 40,
+    "tp": 19,
+    "fp": 0,
+    "tn": 21,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "holdout": {
+    "count": 26,
+    "tp": 13,
+    "fp": 0,
+    "tn": 13,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "benchmark": {
+    "runs": 20,
+    "warmups_excluded": 1,
+    "requests_per_run": 5,
+    "unit": "ms",
+    "median": 5.0398500006849645,
+    "minimum": 2.870299998903647,
+    "maximum": 26.63089999987278,
+    "p95_nearest_rank": 25.427500000660075,
+    "raw": [
+      5.382500003179302,
+      3.5771000002569053,
+      3.2168000034289435,
+      9.613199999876088,
+      23.100499998690793,
+      4.325999998400221,
+      2.870299998903647,
+      25.427500000660075,
+      2.952200000436278,
+      6.113300001743482,
+      3.2276000019919593,
+      16.383100002713036,
+      3.3605999997234903,
+      3.0299999998533167,
+      6.891400000313297,
+      26.63089999987278,
+      4.6971999981906265,
+      5.676799999491777,
+      3.5654999992402736,
+      6.179100000736071
+    ]
+  }
+}

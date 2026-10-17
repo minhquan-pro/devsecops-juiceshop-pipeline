@@ -10,8 +10,8 @@ Usage::
     python scan_gate.py --max-p95-ms 500 --require-tests-pass
 
 The thresholds are intentionally conservative: they are set just below the
-delivered baseline (F1 0.5946) so the gate catches *regressions* without turning
-red on harmless noise. Raise them as the engine improves.
+delivered baseline (corpus F1=1.0, holdout F1=1.0 for v1.1) so the gate catches
+*regressions* without turning red on harmless noise. Raise them as the engine improves.
 """
 from __future__ import annotations
 

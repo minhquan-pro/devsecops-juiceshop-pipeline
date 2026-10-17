@@ -1,9 +1,9 @@
-<!doctype html><html lang='vi'><meta charset='utf-8'><meta http-equiv='Content-Security-Policy' content="default-src 'none'; style-src 'unsafe-inline'"><title>JuiceSec report</title><style>body{font:16px system-ui;margin:40px;line-height:1.5}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bbb;padding:8px;text-align:left;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><h1>Báo cáo JuiceSec Analyzer</h1><p>Cảnh báo cần thẩm định; dữ liệu này không tự xác nhận khai thác.</p><p>Đích: http://127.0.0.1:58957</p><table><tr><th>Quy tắc</th><th>Tiêu đề</th><th>Mức độ</th><th>Tin cậy</th><th>Trạng thái</th><th>Bằng chứng</th><th>Khắc phục</th></tr><tr><td>HDR-content-security-policy</td><td>Thiếu Content Security Policy</td><td>low</td><td>high</td><td>needs_review</td><td>Không thấy header trên HTML gốc; không suy ra XSS.</td><td>Đánh giá chính sách theo ngữ cảnh và kiểm thử hồi quy.</td></tr><tr><td>HDR-x-content-type-options</td><td>Thiếu X Content Type Options</td><td>low</td><td>high</td><td>needs_review</td><td>Không thấy header trên HTML gốc; không suy ra XSS.</td><td>Đánh giá chính sách theo ngữ cảnh và kiểm thử hồi quy.</td></tr><tr><td>HDR-FRAME</td><td>Chưa thấy chính sách chống nhúng khung</td><td>low</td><td>medium</td><td>needs_review</td><td>Không có X-Frame-Options hoặc chỉ thị CSP frame-ancestors.</td><td>Đặt frame-ancestors phù hợp ở phản hồi HTML.</td></tr><tr><td>INFO-METRICS</td><td>Endpoint xuất dữ liệu đo lường</td><td>low</td><td>high</td><td>needs_review</td><td>Nội dung có cấu trúc Prometheus; cần kiểm tra dữ liệu và quyền truy cập.</td><td>Tách mạng quản trị hoặc kiểm soát quyền đọc metrics.</td></tr><tr><td>INFO-DIR</td><td>Dấu hiệu danh sách tệp được công bố</td><td>medium</td><td>medium</td><td>needs_review</td><td>Trang có chỉ mục hoặc liên kết tệp; chưa chứng minh path traversal.</td><td>Tách tệp công khai và riêng tư; kiểm tra quyền ở máy chủ.</td></tr><tr><td>INFO-ERROR</td><td>Thông báo lỗi nội bộ trong phản hồi</td><td>medium</td><td>high</td><td>needs_review</td><td>Có dấu hiệu lỗi trình điều khiển hoặc stack trace; chưa xác nhận SQL injection.</td><td>Giữ chi tiết trong log cục bộ và trả thông báo lỗi chung.</td></tr></table><h2>Dữ liệu và giới hạn</h2><pre>{
-  &quot;schema_version&quot;: &quot;1.0&quot;,
+<!doctype html><html lang='vi'><meta charset='utf-8'><meta http-equiv='Content-Security-Policy' content="default-src 'none'; style-src 'unsafe-inline'"><title>JuiceSec report</title><style>body{font:16px system-ui;margin:40px;line-height:1.5}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bbb;padding:8px;text-align:left;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><h1>Báo cáo JuiceSec Analyzer</h1><p>Cảnh báo cần thẩm định; dữ liệu này không tự xác nhận khai thác.</p><p>Đích: http://127.0.0.1:58430</p><table><tr><th>Quy tắc</th><th>Tiêu đề</th><th>Mức độ</th><th>Tin cậy</th><th>Trạng thái</th><th>Bằng chứng</th><th>Khắc phục</th></tr><tr><td>HDR-content-security-policy</td><td>Thiếu Content Security Policy</td><td>low</td><td>high</td><td>needs_review</td><td>Không thấy header trên HTML gốc; không suy ra XSS.</td><td>Đánh giá chính sách theo ngữ cảnh và kiểm thử hồi quy.</td></tr><tr><td>HDR-x-content-type-options</td><td>Thiếu X Content Type Options</td><td>low</td><td>high</td><td>needs_review</td><td>Không thấy header trên HTML gốc; không suy ra XSS.</td><td>Đánh giá chính sách theo ngữ cảnh và kiểm thử hồi quy.</td></tr><tr><td>HDR-FRAME</td><td>Chưa thấy chính sách chống nhúng khung</td><td>low</td><td>medium</td><td>needs_review</td><td>Không có X-Frame-Options hoặc chỉ thị CSP frame-ancestors.</td><td>Đặt frame-ancestors phù hợp ở phản hồi HTML.</td></tr><tr><td>INFO-METRICS</td><td>Endpoint xuất dữ liệu đo lường</td><td>low</td><td>high</td><td>needs_review</td><td>Nội dung có cấu trúc Prometheus; cần kiểm tra dữ liệu và quyền truy cập.</td><td>Tách mạng quản trị hoặc kiểm soát quyền đọc metrics.</td></tr><tr><td>INFO-DIR</td><td>Dấu hiệu danh sách tệp được công bố</td><td>medium</td><td>medium</td><td>needs_review</td><td>Trang có chỉ mục hoặc liên kết tệp; chưa chứng minh path traversal.</td><td>Tách tệp công khai và riêng tư; kiểm tra quyền ở máy chủ.</td></tr><tr><td>INFO-ERROR</td><td>Thông báo lỗi nội bộ trong phản hồi</td><td>medium</td><td>high</td><td>needs_review</td><td>Có dấu hiệu lỗi trình điều khiển hoặc stack trace; chưa xác nhận SQL injection.</td><td>Giữ chi tiết trong log cục bộ và trả thông báo lỗi chung.</td></tr></table><h2>Dữ liệu và giới hạn</h2><pre>{
+  &quot;schema_version&quot;: &quot;1.1&quot;,
   &quot;mode&quot;: &quot;active_error_probe&quot;,
-  &quot;target&quot;: &quot;http://127.0.0.1:58957&quot;,
-  &quot;generated_at&quot;: &quot;2026-10-13T04:04:25.212929+00:00&quot;,
-  &quot;duration_ms&quot;: 66.178,
+  &quot;target&quot;: &quot;http://127.0.0.1:58430&quot;,
+  &quot;generated_at&quot;: &quot;2026-10-17T10:57:27.577974+00:00&quot;,
+  &quot;duration_ms&quot;: 6.146,
   &quot;findings&quot;: [
     {
       &quot;rule_id&quot;: &quot;HDR-content-security-policy&quot;,
@@ -79,7 +79,7 @@
       &quot;truncated&quot;: false,
       &quot;sha256_prefix&quot;: &quot;a1b5f9836b8342e8681a4e76f2a59e3ac55521858c7d55e11d3987112b5f7dcf&quot;,
       &quot;bytes_captured&quot;: 37,
-      &quot;elapsed_ms&quot;: 15.473
+      &quot;elapsed_ms&quot;: 1.076
     },
     {
       &quot;path&quot;: &quot;/rest/products/search?q=juice&quot;,
@@ -87,7 +87,7 @@
       &quot;truncated&quot;: false,
       &quot;sha256_prefix&quot;: &quot;8fe32e407a1038ee38753b70e5374b3a46d6ae9d5f16cd5b73c53abaca8f5ed0&quot;,
       &quot;bytes_captured&quot;: 11,
-      &quot;elapsed_ms&quot;: 15.452
+      &quot;elapsed_ms&quot;: 1.081
     },
     {
       &quot;path&quot;: &quot;/api-docs/&quot;,
@@ -95,7 +95,7 @@
       &quot;truncated&quot;: false,
       &quot;sha256_prefix&quot;: &quot;a1b5f9836b8342e8681a4e76f2a59e3ac55521858c7d55e11d3987112b5f7dcf&quot;,
       &quot;bytes_captured&quot;: 37,
-      &quot;elapsed_ms&quot;: 15.648
+      &quot;elapsed_ms&quot;: 0.865
     },
     {
       &quot;path&quot;: &quot;/metrics&quot;,
@@ -103,7 +103,7 @@
       &quot;truncated&quot;: false,
       &quot;sha256_prefix&quot;: &quot;cd859768e2fab477b96fa31dac4c0474ae071f1bde5a716222467f6159e8326c&quot;,
       &quot;bytes_captured&quot;: 73,
-      &quot;elapsed_ms&quot;: 2.376
+      &quot;elapsed_ms&quot;: 0.767
     },
     {
       &quot;path&quot;: &quot;/ftp/&quot;,
@@ -111,7 +111,7 @@
       &quot;truncated&quot;: false,
       &quot;sha256_prefix&quot;: &quot;1b5a746c99154f05a9be1f8e506f82c900964f58816a083e4b6aaf0c21c6161d&quot;,
       &quot;bytes_captured&quot;: 71,
-      &quot;elapsed_ms&quot;: 12.35
+      &quot;elapsed_ms&quot;: 0.815
     },
     {
       &quot;path&quot;: &quot;/rest/products/search?q=%27&quot;,
@@ -119,7 +119,7 @@
       &quot;truncated&quot;: false,
       &quot;sha256_prefix&quot;: &quot;63a58f2b4cdeb081801b577a3dcf6b7627fab961bfcd91fed2050d73d5ffe029&quot;,
       &quot;bytes_captured&quot;: 42,
-      &quot;elapsed_ms&quot;: 2.631
+      &quot;elapsed_ms&quot;: 0.851
     }
   ],
   &quot;errors&quot;: [],

@@ -166,7 +166,8 @@ class _PythonTaint(ast.NodeVisitor):
             return True
         if isinstance(node, ast.Name):
             return node.id in self.tainted
-        if isinstance(node, (ast.BinOp, ast.JoinedStr, ast.Attribute, ast.Subscript, ast.Call)):
+        if isinstance(node, (ast.BinOp, ast.JoinedStr, ast.FormattedValue,
+                              ast.Attribute, ast.Subscript, ast.Call)):
             return any(self._expr_tainted(child) for child in ast.iter_child_nodes(node))
         return False
 
@@ -220,6 +221,17 @@ class _PythonTaint(ast.NodeVisitor):
                 self._record("xml", getattr(node.value, "lineno", 0),
                              f"{node.arg}=True", "medium")
         self.generic_visit(node)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        """Isolate taint state per function scope to prevent cross-function leakage."""
+        saved_tainted = set(self.tainted)
+        saved_aliases = dict(self.aliases)
+        self.generic_visit(node)
+        self.tainted = saved_tainted
+        self.aliases = saved_aliases
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+    visit_ClassDef = visit_FunctionDef
 
 
 def analyze_python(source: str, filename: str) -> list:

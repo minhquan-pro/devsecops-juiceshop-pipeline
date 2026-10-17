@@ -202,7 +202,7 @@ def scan(url, active=False):
             records.append({k: v for k, v in record.items() if k not in ("body", "headers")})
         except (OSError, http.client.HTTPException, ValueError) as exc:
             errors.append({"path": path, "type": type(exc).__name__, "message": str(exc)[:160]})
-    return {"schema_version": "1.0", "mode": "active_error_probe" if active else "baseline",
+    return {"schema_version": "1.1", "mode": "active_error_probe" if active else "baseline",
             "target": url, "generated_at": datetime.now(timezone.utc).isoformat(),
             "duration_ms": round((time.perf_counter()-start)*1000, 3),
             "findings": findings, "records": records, "errors": errors,

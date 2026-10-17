@@ -1,0 +1,683 @@
+PHỤ LỤC B: TOÀN BỘ MẪU THỬ NGHIỆM CORPUS, HOLDOUT VÀ ĐỐI CHỨNG DỰ ĐOÁN
+
+Mỗi mẫu dưới đây được sinh trực tiếp từ data/ và evidence/ bằng labs/gen_report_appendices.py, nên cột nhãn, dự đoán và quy tắc khớp luôn trùng khớp với số liệu ở Chương 5 và với artifact đã công bố.
+
+================================================================================
+B.1 TẬP CORPUS KIỂM CHUẨN (40 MẪU)
+
+B.1.1 Mẫu Thử Nghiệm #1: SQL01
+- Mã định danh: SQL01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-SQL
+- Lý do gán nhãn: Ghép trực tiếp dữ liệu request vào SQL.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const q = "SELECT id FROM Users WHERE email=" + req.body.email;
+
+B.1.2 Mẫu Thử Nghiệm #2: SQL02
+- Mã định danh: SQL02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Giá trị được truyền riêng bằng tham số.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | db.execute("SELECT id FROM Users WHERE email = ?", [email]);
+
+B.1.3 Mẫu Thử Nghiệm #3: SQL03
+- Mã định danh: SQL03
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-SQL
+- Lý do gán nhãn: Nối chuỗi qua nhiều dòng nên regex một dòng bỏ sót.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const q = "SELECT id FROM Users WHERE email=";
+    2 | const final = q + input;
+    3 | db.query(final);
+
+B.1.4 Mẫu Thử Nghiệm #4: SQL04
+- Mã định danh: SQL04
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Chuỗi nằm trong chú thích, không được thực thi.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | // Example to avoid: SELECT * FROM Users WHERE id= + input
+
+B.1.5 Mẫu Thử Nghiệm #5: XSS01
+- Mã định danh: XSS01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-DOM, SAST-AST-XSS
+- Lý do gán nhãn: Dữ liệu người dùng đi vào HTML sink.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | node.innerHTML = req.query.name;
+
+B.1.6 Mẫu Thử Nghiệm #6: XSS02
+- Mã định danh: XSS02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Văn bản không được phân tích như HTML.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | node.textContent = req.query.name;
+
+B.1.7 Mẫu Thử Nghiệm #7: XSS03
+- Mã định danh: XSS03
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-XSS
+- Lý do gán nhãn: Tên thuộc tính dựng động vượt regex.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | node["inner"+"HTML"] = req.query.name;
+
+B.1.8 Mẫu Thử Nghiệm #8: XSS04
+- Mã định danh: XSS04
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Nguồn cố định không có dữ liệu không tin cậy.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | node.innerHTML = "<strong>Fixed label</strong>";
+
+B.1.9 Mẫu Thử Nghiệm #9: XSS05
+- Mã định danh: XSS05
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-DOM, SAST-AST-XSS
+- Lý do gán nhãn: Ghi nguồn URL vào bộ phân tích HTML.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | document.write(location.hash);
+
+B.1.10 Mẫu Thử Nghiệm #10: XSS06
+- Mã định danh: XSS06
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Ví dụ trong chú thích tạo cảnh báo giả.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | // document.write(location.hash) is forbidden here
+
+B.1.11 Mẫu Thử Nghiệm #11: JWT01
+- Mã định danh: JWT01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-JWT, SAST-AST-JWT
+- Lý do gán nhãn: Cấp quyền từ token chưa xác minh.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const user = jwt.decode(token); allow(user.role);
+
+B.1.12 Mẫu Thử Nghiệm #12: JWT02
+- Mã định danh: JWT02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Đoạn mã thể hiện API verify và thuật toán cố định; chưa đánh giá claim.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const user = jwt.verify(token, key, {algorithms:["RS256"]});
+
+B.1.13 Mẫu Thử Nghiệm #13: JWT03
+- Mã định danh: JWT03
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Decode để xem trước, không cấp quyền.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const preview = jwt.decode(token); showDebugOnly(preview);
+
+B.1.14 Mẫu Thử Nghiệm #14: JWT04
+- Mã định danh: JWT04
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-JWT
+- Lý do gán nhãn: Hàm wrapper không nằm trong mẫu regex.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const user = decodeTokenWithoutVerification(token); allow(user.role);
+
+B.1.15 Mẫu Thử Nghiệm #15: CMD01
+- Mã định danh: CMD01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-EXEC, SAST-AST-CMD
+- Lý do gán nhãn: Đầu vào người dùng chạy qua shell.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | child_process.exec(req.query.cmd);
+
+B.1.16 Mẫu Thử Nghiệm #16: CMD02
+- Mã định danh: CMD02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Executable cố định và không qua shell trong ví dụ.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | spawn("/usr/bin/printf", ["%s", input], {shell:false});
+
+B.1.17 Mẫu Thử Nghiệm #17: CMD03
+- Mã định danh: CMD03
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Chú thích không thực thi.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | // child_process.exec(userCommand) is unsafe
+
+B.1.18 Mẫu Thử Nghiệm #18: PATH01
+- Mã định danh: PATH01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-PATH, SAST-AST-PATH
+- Lý do gán nhãn: Đường dẫn trực tiếp do request chi phối.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | fs.readFile(req.query.file, handler);
+
+B.1.19 Mẫu Thử Nghiệm #19: PATH02
+- Mã định danh: PATH02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Giả định approvedPath đã được kiểm tra theo mô tả corpus.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | fs.readFile(approvedPath, handler);
+
+B.1.20 Mẫu Thử Nghiệm #20: PATH03
+- Mã định danh: PATH03
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-PATH
+- Lý do gán nhãn: Biến trung gian làm mất dấu nguồn ở regex.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const file = req.query.file; fs.readFile(file, handler);
+
+B.1.21 Mẫu Thử Nghiệm #21: SSRF01
+- Mã định danh: SSRF01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-SSRF, SAST-AST-SSRF
+- Lý do gán nhãn: URL do request chi phối.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | fetch(req.body.url);
+
+B.1.22 Mẫu Thử Nghiệm #22: SSRF02
+- Mã định danh: SSRF02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Đích cố định trong lab.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | fetch("http://127.0.0.1:3001/health");
+
+B.1.23 Mẫu Thử Nghiệm #23: SSRF03
+- Mã định danh: SSRF03
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-SSRF
+- Lý do gán nhãn: Đích qua biến trung gian bị bỏ sót.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const dest=req.body.url; axios.get(dest);
+
+B.1.24 Mẫu Thử Nghiệm #24: XXE01
+- Mã định danh: XXE01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-XML
+- Lý do gán nhãn: Corpus giả định parser nhận XML không tin cậy.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | parser = XMLParser(resolve_entities=True, load_dtd=True)
+
+B.1.25 Mẫu Thử Nghiệm #25: XXE02
+- Mã định danh: XXE02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Tùy chọn nguy hiểm được tắt.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | parser = XMLParser(resolve_entities=False, load_dtd=False)
+
+B.1.26 Mẫu Thử Nghiệm #26: XXE03
+- Mã định danh: XXE03
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Chú thích làm regex dương tính giả.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | # Never enable resolve_entities=True in this project
+
+B.1.27 Mẫu Thử Nghiệm #27: DES01
+- Mã định danh: DES01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-DESER, SAST-AST-DESER
+- Lý do gán nhãn: Dữ liệu không tin cậy được giải tuần tự hóa đối tượng.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | obj = pickle.loads(request.body)
+
+B.1.28 Mẫu Thử Nghiệm #28: DES02
+- Mã định danh: DES02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Parser JSON không phục hồi đối tượng có phương thức; vẫn cần schema.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | obj = json.loads(request.body)
+
+B.1.29 Mẫu Thử Nghiệm #29: DES03
+- Mã định danh: DES03
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-DESER
+- Lý do gán nhãn: Alias hàm vượt regex.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | loader = pickle.loads; obj = loader(request.body)
+
+B.1.30 Mẫu Thử Nghiệm #30: EVAL01
+- Mã định danh: EVAL01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-EVAL, SAST-AST-EVAL
+- Lý do gán nhãn: Nguồn không tin cậy được thực thi.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | eval(req.body.expression)
+
+B.1.31 Mẫu Thử Nghiệm #31: EVAL02
+- Mã định danh: EVAL02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Chuyển kiểu dữ liệu, không thực thi biểu thức.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | value = int(request.args["value"])
+
+B.1.32 Mẫu Thử Nghiệm #32: BAC01
+- Mã định danh: BAC01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-BAC
+- Lý do gán nhãn: Corpus giả định không có middleware kiểm tra chủ sở hữu.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | return Basket.findByPk(req.params.id);
+
+B.1.33 Mẫu Thử Nghiệm #33: BAC02
+- Mã định danh: BAC02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Truy vấn ràng buộc ID và chủ sở hữu trong ví dụ.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | return Basket.findOne({where:{id:req.params.id,UserId:currentUser.id}});
+
+B.1.34 Mẫu Thử Nghiệm #34: CSRF01
+- Mã định danh: CSRF01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-CSRF
+- Lý do gán nhãn: Corpus giả định GET thay đổi tên từ cookie mà không kiểm tra CSRF.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | router.get("/change-name", cookieAuth, updateName);
+
+B.1.35 Mẫu Thử Nghiệm #35: CSRF02
+- Mã định danh: CSRF02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Corpus giả định csrfGuard hợp lệ.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | router.post("/change-name", cookieAuth, csrfGuard, updateName);
+
+B.1.36 Mẫu Thử Nghiệm #36: TRUST01
+- Mã định danh: TRUST01
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-TRUST, SAST-AST-TRUST
+- Lý do gán nhãn: Tin cậy HTML từ request.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | sanitizer.bypassSecurityTrustHtml(req.query.html);
+
+B.1.37 Mẫu Thử Nghiệm #37: TRUST02
+- Mã định danh: TRUST02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Dùng hàm làm sạch theo ngữ cảnh trong ví dụ.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | sanitizer.sanitize(SecurityContext.HTML, value);
+
+B.1.38 Mẫu Thử Nghiệm #38: SAFE01
+- Mã định danh: SAFE01
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Tính tổng không có sink bảo mật trong phạm vi.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const total = prices.reduce((sum, x) => sum + x, 0);
+
+B.1.39 Mẫu Thử Nghiệm #39: SAFE02
+- Mã định danh: SAFE02
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Thông báo cố định không chứa token.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | logger.info("Request accepted");
+
+B.1.40 Mẫu Thử Nghiệm #40: EVAL03
+- Mã định danh: EVAL03
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Dòng chú thích dùng làm đối chứng âm.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | // eval(input) is an example in a tutorial
+
+================================================================================
+B.2 TẬP HOLDOUT ĐỘC LẬP (26 MẪU)
+
+B.2.1 Mẫu Holdout #1: H-SQL-A
+- Mã định danh: H-SQL-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-SQL, SAST-AST-SQL
+- Lý do gán nhãn: Taint qua hai biến trung gian rồi ghép vào truy vấn.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const clause = "WHERE owner=" + req.params.owner;
+    2 | db.query("SELECT * FROM items " + clause);
+
+B.2.2 Mẫu Holdout #2: H-SQL-B
+- Mã định danh: H-SQL-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Truy vấn tham số hóa với placeholder $1.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | db.execute("SELECT * FROM items WHERE owner = $1", [ownerId]);
+
+B.2.3 Mẫu Holdout #3: H-XSS-A
+- Mã định danh: H-XSS-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-DOM, SAST-AST-XSS
+- Lý do gán nhãn: Nguồn từ header chảy vào HTML sink.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const banner = req.headers["x-banner"];
+    2 | el.innerHTML = banner;
+
+B.2.4 Mẫu Holdout #4: H-XSS-B
+- Mã định danh: H-XSS-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Chuỗi tĩnh, không có nguồn không tin cậy.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | el.innerHTML = "<p>Loading…</p>";
+
+B.2.5 Mẫu Holdout #5: H-XSS-C
+- Mã định danh: H-XSS-C
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-DOM, SAST-AST-XSS
+- Lý do gán nhãn: Nguồn URL chảy vào document.write.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const p = location.hash.slice(1);
+    2 | document.write(p);
+
+B.2.6 Mẫu Holdout #6: H-CMD-A
+- Mã định danh: H-CMD-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-EXEC, SAST-AST-CMD
+- Lý do gán nhãn: Tham số request ghép vào lệnh shell.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const host = req.query.host;
+    2 | child_process.exec("ping -c1 " + host);
+
+B.2.7 Mẫu Holdout #7: H-CMD-B
+- Mã định danh: H-CMD-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: execFile nhận mảng tham số, không qua shell.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | child_process.execFile("/bin/ping", ["-c1", host]);
+
+B.2.8 Mẫu Holdout #8: H-PATH-A
+- Mã định danh: H-PATH-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-PATH
+- Lý do gán nhãn: Đường dẫn ghép từ tham số request.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const name = req.params.name;
+    2 | res.sendFile("/data/" + name);
+
+B.2.9 Mẫu Holdout #9: H-PATH-B
+- Mã định danh: H-PATH-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Đường dẫn dựng từ ID đã ánh xạ trong thư mục cố định.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | res.sendFile(path.join(PUBLIC_DIR, mappedId));
+
+B.2.10 Mẫu Holdout #10: H-SSRF-A
+- Mã định danh: H-SSRF-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-SSRF
+- Lý do gán nhãn: Đích HTTP lấy từ body request.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const next = req.body.next;
+    2 | fetch(next);
+
+B.2.11 Mẫu Holdout #11: H-SSRF-B
+- Mã định danh: H-SSRF-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Đích cố định.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | fetch("https://api.internal/health");
+
+B.2.12 Mẫu Holdout #12: H-DES-A
+- Mã định danh: H-DES-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-DESER, SAST-AST-DESER
+- Lý do gán nhãn: Dữ liệu request giải tuần tự hóa qua biến trung gian.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | payload = request.data
+    2 | obj = pickle.loads(payload)
+
+B.2.13 Mẫu Holdout #13: H-DES-B
+- Mã định danh: H-DES-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: JSON không phục hồi đối tượng có phương thức.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | obj = json.loads(request.body)
+
+B.2.14 Mẫu Holdout #14: H-JWT-A
+- Mã định danh: H-JWT-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-JWT, SAST-AST-JWT
+- Lý do gán nhãn: Cấp quyền dựa trên claim chưa xác minh.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const claims = jwt.decode(token);
+    2 | if (claims.role === "admin") grant();
+
+B.2.15 Mẫu Holdout #15: H-JWT-B
+- Mã định danh: H-JWT-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Chữ ký và thuật toán được xác minh trước khi dùng claim.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const claims = jwt.verify(token, pubKey, {algorithms:["RS256"]});
+    2 | allow(claims.role);
+
+B.2.16 Mẫu Holdout #16: H-BAC-A
+- Mã định danh: H-BAC-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-BAC
+- Lý do gán nhãn: Truy vấn theo ID không ràng buộc chủ sở hữu.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const order = await Order.findById(req.params.id);
+    2 | return res.json(order);
+
+B.2.17 Mẫu Holdout #17: H-BAC-B
+- Mã định danh: H-BAC-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Ràng buộc chủ sở hữu trong truy vấn.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const order = await Order.findOne({where:{id:req.params.id,UserId:req.user.id}});
+
+B.2.18 Mẫu Holdout #18: H-CSRF-A
+- Mã định danh: H-CSRF-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-CSRF
+- Lý do gán nhãn: Thay đổi trạng thái (xóa) qua GET.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | router.get("/profile/delete", cookieAuth, deleteProfile);
+
+B.2.19 Mẫu Holdout #19: H-CSRF-B
+- Mã định danh: H-CSRF-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: POST kèm middleware CSRF.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | router.post("/profile/delete", cookieAuth, csrfMiddleware, deleteProfile);
+
+B.2.20 Mẫu Holdout #20: H-TRUST-A
+- Mã định danh: H-TRUST-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-TRUST, SAST-AST-TRUST
+- Lý do gán nhãn: Bỏ qua làm sạch của framework với dữ liệu request.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | this.html = sanitizer.bypassSecurityTrustHtml(req.query.doc);
+
+B.2.21 Mẫu Holdout #21: H-TRUST-B
+- Mã định danh: H-TRUST-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Làm sạch theo ngữ cảnh.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | this.html = sanitizer.sanitize(SecurityContext.HTML, value);
+
+B.2.22 Mẫu Holdout #22: H-XXE-A
+- Mã định danh: H-XXE-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-XML, SAST-AST-XXE
+- Lý do gán nhãn: Bật thực thể ngoài khi parse XML từ request.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | parser = XMLParser(resolve_entities=True)
+    2 | data = parser.parse(request.data)
+
+B.2.23 Mẫu Holdout #23: H-XXE-B
+- Mã định danh: H-XXE-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Tắt thực thể ngoài và DTD.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | parser = XMLParser(resolve_entities=False, load_dtd=False)
+
+B.2.24 Mẫu Holdout #24: H-EVAL-A
+- Mã định danh: H-EVAL-A
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-EVAL, SAST-AST-EVAL
+- Lý do gán nhãn: Biểu thức request thực thi qua eval.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const expr = req.body.formula;
+    2 | eval(expr);
+
+B.2.25 Mẫu Holdout #25: H-SAFE-A
+- Mã định danh: H-SAFE-A
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Biến đổi dữ liệu, không có sink bảo mật.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const rows = items.filter(x => x.active).map(x => x.name);
+
+B.2.26 Mẫu Holdout #26: H-SAFE-B
+- Mã định danh: H-SAFE-B
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Tính toán nội bộ, không có nguồn không tin cậy.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | await cache.set("key", computeChecksum(buffer));

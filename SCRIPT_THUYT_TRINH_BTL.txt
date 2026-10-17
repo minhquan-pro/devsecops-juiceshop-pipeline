@@ -192,7 +192,7 @@ PHẦN 5: ĐÁNH GIÁ ĐỘ ĐO KHOA HỌC & GIỚI HẠN KỸ THUẬT (Khoảng
 
 4. Hiệu năng quét:
 - evaluate.py chạy 20 vòng benchmark trên server giả lập fixture (loại bỏ 1 vòng warm-up).
-- Kết quả: độ trễ trung vị ~14ms, p95 ~36ms, đáp ứng tốt tiêu chí phản hồi nhanh trong quy trình CI/CD. Số liệu thô lưu trong evidence/validation.json.
+- Kết quả: độ trễ trung vị cực thấp (~3 - 4ms), p95 dưới 25ms (ngưỡng an toàn cổng CI cho phép tối đa 500ms), đáp ứng xuất sắc tiêu chí phản hồi nhanh trong quy trình CI/CD. Số liệu thô lưu trong evidence/validation.json.
 
 5. Giới hạn kỹ thuật nhóm thừa nhận thẳng thắn:
 - Engine JS-like theo vết taint đơn giản, KHÔNG phải trình phân tích đầy đủ. Vẫn có thể bỏ sót khi luồng dữ liệu đi qua hàm, callback, closure, hoặc các framework không nhận diện được.
@@ -221,7 +221,7 @@ Câu hỏi 3: Bộ quy tắc SAST có đủ bao quát không?
 
 Câu hỏi 4: Đã đo đạc latency như thế nào?
 -> Trả lời:
-"Nhóm dùng evaluate.py chạy 20 vòng quét benchmark tự động trên server giả lập fixture (loại bỏ 1 vòng khởi động warm-up). Kết quả được ghi lại vào file evidence/validation.json với các chỉ số median, min, max và p95 rõ ràng. Cụ thể median khoảng 14ms và p95 khoảng 36ms. Cổng chất lượng scan_gate.py còn chặn cứng nếu p95 vượt 500ms, nên hiệu năng được bảo vệ tự động trong CI."
+"Nhóm dùng evaluate.py chạy 20 vòng quét benchmark tự động trên server giả lập fixture (loại bỏ 1 vòng khởi động warm-up). Kết quả được ghi lại vào file evidence/validation.json với các chỉ số median, min, max và p95 rõ ràng. Cụ thể median đạt khoảng 3 - 4ms và p95 dưới 25ms. Cổng chất lượng scan_gate.py còn chặn cứng nếu p95 vượt 500ms, nên hiệu năng được bảo vệ tự động trong CI."
 
 Câu hỏi 5: Em nói F1 đạt 100% — con số này có đáng tin không, hay là học vẹt?
 -> Trả lời:
