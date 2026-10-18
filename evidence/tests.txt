@@ -52,6 +52,6 @@ test_localhost_pinned (test_core.TargetTests.test_localhost_pinned) ... ok
 test_loopback (test_core.TargetTests.test_loopback) ... ok
 
 ----------------------------------------------------------------------
-Ran 52 tests in 1.225s
+Ran 52 tests in 1.482s
 
 OK
