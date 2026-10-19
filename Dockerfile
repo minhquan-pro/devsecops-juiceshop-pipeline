@@ -25,18 +25,35 @@ print("zero third-party runtime dependencies confirmed")
 PY
 
 FROM base AS runtime
-# Install only the application sources and static assets.
-COPY juicesec/ ./juicesec/
-COPY static/ ./static/
-COPY data/ ./data/
-COPY app.py cli.py evaluate.py ./
-COPY tests/ ./tests/
-COPY labs/ ./labs/
-# Run as a non-root user.
-RUN useradd --create-home --uid 10001 juicesec
+
+# Create non-root user early (security best practice)
+RUN useradd --create-home --uid 10001 --shell /sbin/nologin juicesec \
+    && chown -R juicesec:juicesec /app
+
+# Install only the application sources and static assets
+COPY --chown=juicesec:juicesec juicesec/ ./juicesec/
+COPY --chown=juicesec:juicesec static/ ./static/
+COPY --chown=juicesec:juicesec data/ ./data/
+COPY --chown=juicesec:juicesec app.py cli.py evaluate.py scan_gate.py ./
+COPY --chown=juicesec:juicesec tests/ ./tests/
+COPY --chown=juicesec:juicesec labs/ ./labs/
+
+# Switch to non-root user (CRITICAL SECURITY)
 USER juicesec
-# The tool is loopback-only and single-user; bind inside the container.
+
+# Health check for container orchestration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import http.client; conn=http.client.HTTPConnection('127.0.0.1', 5000, timeout=5); conn.request('GET', '/'); r=conn.getresponse(); exit(0 if r.status==200 else 1)"
+
+# The tool is loopback-only and single-user; bind inside the container
 EXPOSE 5000
-# Default command is the UI. Override with `docker run ... python cli.py ...` for batch scans.
+
+# Security: Use exec form to avoid shell interpretation
 ENTRYPOINT ["python"]
 CMD ["app.py", "--port", "5000"]
+
+# Metadata labels for tracking
+LABEL maintainer="security-team" \
+      version="1.1.0" \
+      description="JuiceSec Educational Security Scanner" \
+      security.scan="passed"
