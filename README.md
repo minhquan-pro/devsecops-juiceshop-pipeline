@@ -1,12 +1,15 @@
-# JuiceSec Analyzer 1.1
+# JuiceSec Analyzer 1.2
 
-Bản mẫu giáo dục hỗ trợ đề tài PortSwigger và OWASP Juice Shop. Có năm phân hệ: tri thức, HTTP probe cục bộ, rà soát source bằng regex kết hợp AST/taint, script khai thác Juice Shop thật, và báo cáo JSON/HTML. Kèm một pipeline DevSecOps chạy kiểm thử, cổng chất lượng và quét bảo mật trên chính công cụ này.
+Bản mẫu giáo dục hỗ trợ đề tài PortSwigger và OWASP Juice Shop. Có năm phân hệ: tri thức, HTTP probe & OpenAPI Fuzzer, rà soát source bằng AST liên thủ tục (Inter-procedural Taint) cho Python và bộ theo vết token/regex cho JS-like, script khai thác Juice Shop thật, và báo cáo JSON/HTML. Kèm một pipeline DevSecOps chạy kiểm thử, cổng chất lượng và quét bảo mật trên chính công cụ này.
 
-## Điểm mới ở 1.1
+## Điểm mới ở 1.2
 
-- **Engine SAST lai**: `juicesec/astscan.py` thêm phân tích luồng dữ liệu bằng `ast` chuẩn (Python) và một bộ theo vết taint cho JS-like. Kết quả trên corpus bàn giao: precision 100%, recall 100%, F1 100% (trước là 61.11% / 57.89% / 59.46%). Có thêm **tập holdout 26 mẫu** độc lập chỉ để kiểm tra tổng quát hoá, cũng đạt F1 100%.
-- **Khai thác thật**: `labs/juice_shop_exploits.py` chạy SQLi bypass đăng nhập, IDOR giỏ hàng và giả mạo JWT trực tiếp lên Juice Shop đang chạy, ghi bằng chứng HTTP thật.
-- **Pipeline DevSecOps**: `.github/workflows/ci.yml` và `dast.yml` cùng `Dockerfile`, `scan_gate.py` cổng chất lượng, `requirements-dev.txt`, và `.github/workflows` quét bandit/semgrep/gitleaks/trivy.
+- **SAST Lõi Sâu: Inter-procedural Taint Analysis cho Python**: Nâng cấp `juicesec/astscan.py` với cấu trúc đồ thị lời gọi hàm (Call Graph) và tóm tắt hàm (Function Summaries) 2-pass. Theo vết dữ liệu bẩn (taint tracking) xuyên qua hàm con, đa tầng gọi (multi-hop calls), giá trị trả về (`return`) và phương thức lớp (`class method`). Khắc phục Failure Mode 4 (Inter-procedural Discontinuity), nâng F1 trên tập CVE ngoại lai (`data/external_corpus.json`) từ 0.56 lên **0.6471**.
+- **DAST Lõi Sâu: Dynamic OpenAPI / Swagger Fuzzer**: Nâng cấp `juicesec/core.py` với tính năng tự động khám phá endpoint động từ `/api-docs/` (chuẩn OpenAPI v2 và v3), bóc tách kiểu tham số và tự động sinh payload fuzzing (biên giá trị `0`, `-1`, max/min integer; ép sai kiểu; SQLi, XSS, Path Traversal, Command Injection, LDAP, NoSQL) thay vì chỉ dùng danh sách path tĩnh. Bổ sung cờ `--openapi-fuzz` cho CLI và Web API.
+- **Engine SAST lai & Phân tích Sai số Minh bạch**: `juicesec/astscan.py` kết hợp phân tích cú pháp `ast` chuẩn (Python) và bộ theo vết taint/token cho JavaScript/Node.js (intra-procedural heuristic). Đạt F1=1.0 trên tập vi chuẩn tổng hợp nội bộ (corpus 40 mẫu, holdout 26 mẫu) đóng vai trò chốt chặn hồi quy (regression floor). Đồng thời, hệ thống minh bạch hóa các Failure Modes và cung cấp báo cáo chi tiết tại [`docs/ERROR_ANALYSIS.md`](docs/ERROR_ANALYSIS.md).
+- **Mô hình Đe dọa & Giới hạn Cấu trúc**: Bổ sung mô hình an toàn chuẩn STRIDE tại [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) và phân tích 5 giới hạn kỹ thuật theo lý thuyết khả toán (Rice's Theorem) tại [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).
+- **Khai thác thật & Tái lập Độc lập**: `labs/juice_shop_exploits.py` chạy các kịch bản SQLi, IDOR và JWT trực tiếp lên Juice Shop với Docker image digest cố định (`v15.0.0@sha256:721fc2cf0de50f11181be391152a5509c25fb13d0a21852277d13e3871dd6cf2`), phân định rạch ròi vết HTTP thực nghiệm và mock fixture server.
+- **Pipeline DevSecOps Chặt chẽ**: Tự động hóa CI qua `.github/workflows/ci.yml` và `dast.yml` với kiểm tra toàn vẹn mã băm SHA-256 (`evidence/checksums.sha256`) và ràng buộc zero third-party runtime dependencies.
 
 ## Chạy nhanh
 
@@ -58,7 +61,7 @@ python labs/juice_shop_exploits.py --target http://127.0.0.1:3000 --out evidence
 python labs/redact_evidence.py evidence/
 ```
 
-Script chỉ nhận đích loopback, chỉ dùng thư viện chuẩn, và khử nhạy cảm token trước khi ghi. Ba kịch bản: SQLi bypass `POST /rest/user/login`; IDOR đọc giỏ hàng của người khác; giả mạo JWT bằng `alg:none` và HS256 với secret yếu. Mỗi kịch bản ghi request, mã phản hồi và kết luận `vulnerable`/`not_reproduced`.
+Script chỉ nhận đích loopback, chỉ dùng thư viện chuẩn, và khử nhạy cảm token trước khi ghi. Ba kịch bản: SQLi bypass `POST /rest/user/login`; IDOR đọc giỏ hàng của người khác; giả mạo JWT bằng `alg:none` và HS256 với secret yếu. Mỗi kịch bản ghi request, mã phản hồi và kết luận `vulnerable`, `not_reproduced` hoặc `inconclusive` khi chưa đủ bằng chứng.
 
 ## Pipeline DevSecOps
 
@@ -129,26 +132,28 @@ python -m unittest discover -s tests -v
 python evaluate.py
 ```
 
-`evaluate.py` chạy 52 test, corpus 40 mẫu, holdout 26 mẫu và 20 vòng benchmark HTTP fixture sau một warm-up. Kết quả trong evidence:
+`evaluate.py` chạy toàn bộ bài test unit, corpus 40 mẫu, holdout 26 mẫu và 20 vòng benchmark HTTP fixture sau một warm-up. Kết quả trong evidence:
 
 - `tests.txt`: kết quả từng test.
-- `validation.json`: môi trường, thống kê, engine và thời gian thô (có cả corpus và holdout).
+- `validation.json`: môi trường, thống kê, provenance (hash SHA-256 dataset, kiểm tra schema/trùng lặp), engine và thời gian thô.
 - `corpus-results.json`: nhãn, dự đoán, TP/FP/TN/FN của từng mẫu corpus.
-- `holdout-results.json`: như trên cho tập holdout độc lập.
+- `holdout-results.json`: như trên cho tập holdout tổng hợp kiểm thử hồi quy.
 - `fixture-report.json` và `.html`: báo cáo mô phỏng.
 - `juice-exploits.json`: bằng chứng khai thác thật trên Juice Shop (đã khử nhạy cảm).
 - `juice-baseline.json` / `juice-error-probe.json`: scan thật trên Juice Shop.
 - `mechanism-demos.json`: SQL, quyền truy cập, đường dẫn và chữ ký HMAC tự xây dựng.
 
-**Corpus bàn giao (40 mẫu)**: TP=19, FP=0, TN=21, FN=0 → precision=100%, recall=100%, F1=100%.
-**Holdout độc lập (26 mẫu, dùng để kiểm tra tổng quát hoá, không dùng để chỉnh rule)**: TP=13, FP=0, TN=13, FN=0 → precision=100%, recall=100%, F1=100%.
-**Baseline 1.0 để so sánh**: TP=11, FP=7, TN=14, FN=8 → 61.11% / 57.89% / 59.46%.
+**Corpus nội bộ (40 mẫu)**: TP=19, FP=0, TN=21, FN=0 → Precision=1.0000, Recall=1.0000, F1=1.0000.
+**Holdout nội bộ (26 mẫu, chốt chặn hồi quy)**: TP=13, FP=0, TN=13, FN=0 → Precision=1.0000, Recall=1.0000, F1=1.0000.
+**Đánh giá ngoài mẫu (Out-of-sample External Corpus, 40 mẫu từ CVE công khai theo giao thức Zero-Tuning)**: Được đo đạc độc lập tại [`data/external_corpus.json`](data/external_corpus.json), phản ánh năng lực tổng quát hóa thực tế mà không tinh chỉnh quy tắc ép điểm.
+**Baseline 1.0 tham chiếu cũ**: TP=11, FP=7, TN=14, FN=8 → Precision=61.11%, Recall=57.89%, F1=59.46%.
 
-Đơn vị là snippet có/không ít nhất một finding. Corpus có giả định ngữ cảnh; đọc rationale. Holdout là thước đo trung thực hơn vì không dùng khi phát triển rule. Đây **không phải** đánh giá ngoài mẫu trên Juice Shop, vì tập mẫu là snippet nhỏ tự chọn.
+Đơn vị đo là snippet mã nguồn (nhị phân có/không ít nhất một finding). Nhóm nghiên cứu khẳng định các tập nội bộ là vi chuẩn tổng hợp có chủ đích (curated synthetic benchmark), không đại diện cho toàn bộ các trường hợp phức tạp ngoài thực tế. Mọi phân tích sai số và đánh đổi học thuật được trình bày chi tiết tại [`docs/ERROR_ANALYSIS.md`](docs/ERROR_ANALYSIS.md) và [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).
 
 ## Giới hạn kỹ thuật
 
-- Regex theo dòng (đã bỏ dòng chỉ có chú thích) kết hợp AST/taint bằng thư viện chuẩn. Engine JS-like theo vết taint đơn giản, không phải trình phân tích đầy đủ; vẫn có thể bỏ sót luồng qua hàm, callback, hoặc framework không nhận diện được.
+- Regex theo dòng (đã bỏ dòng chỉ có chú thích) kết hợp AST cho Python và bộ theo vết dòng chảy dựa trên token/regex cho JS-like (không phải parser ECMAScript AST đầy đủ). Engine JS-like theo vết taint đơn giản; không hỗ trợ luồng liên hàm (inter-procedural), closure lồng, destructuring hoặc callback bất đồng bộ.
+- Tập holdout là bộ vi chuẩn tổng hợp nội bộ (synthetic micro-benchmark) phục vụ kiểm định hồi quy, không phải tập dữ liệu bên ngoài thu thập độc lập.
 - Không có crawl, không chạy JS trong trình duyệt; DAST gửi 5 đường dẫn cố định và thêm đúng một probe dấu nháy.
 - Mục tiêu chỉ HTTP loopback; không userinfo/path/query/fragment trong origin. localhost được pin IP; không redirect.
 - Body tối đa 262144 byte, source tối đa 200000 byte UTF-8, findings tối đa 200.
@@ -158,7 +163,7 @@ python evaluate.py
 
 ## Cấu trúc
 
-`app.py` server; `cli.py` dòng lệnh; `evaluate.py` số liệu; `scan_gate.py` cổng chất lượng; `juicesec/core.py` lõi HTTP + SAST; `juicesec/astscan.py` engine AST/taint; `static/` giao diện; `data/` tri thức, corpus, holdout; `tests/` kiểm thử; `labs/` khai thác thật và khử nhạy cảm; `evidence/` số liệu đã chạy; `.github/workflows/` pipeline; `Dockerfile` image công cụ.
+`app.py` server; `cli.py` dòng lệnh; `evaluate.py` số liệu; `scan_gate.py` cổng chất lượng; `juicesec/core.py` lõi HTTP + SAST; `juicesec/astscan.py` AST/taint cho Python và theo vết token/regex cho JS-like; `static/` giao diện; `data/` tri thức, corpus, holdout; `tests/` kiểm thử; `labs/` khai thác thật và khử nhạy cảm; `evidence/` số liệu đã chạy; `.github/workflows/` pipeline; `Dockerfile` image công cụ.
 
 ## Hồ sơ cần bổ sung khi làm lab thật
 

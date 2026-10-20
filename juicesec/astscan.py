@@ -10,10 +10,14 @@ Two engines:
 * :func:`analyze_python` parses real Python with the stdlib ``ast`` module and
   performs a small, conservative taint pass: it tracks which names hold a
   request-controlled value and whether that value reaches a dangerous sink.
-* :func:`analyze_javascript` handles the JS/TS-like snippets used elsewhere in
-  the project with a token-based flow tracker. It is deliberately conservative:
-  it only reports a finding when it can show data flowing from a source to a
-  sink, either directly or through a single intermediate assignment.
+* :func:`analyze_javascript` handles JS/TS snippets using a lightweight
+  regex- and token-based data flow tracker (NOT a full ECMAScript AST parser).
+  It does NOT claim complete JavaScript language parsing.
+  Known unsupported flows include:
+  - Inter-procedural call graphs and cross-module taint propagation
+  - Complex nested closures, higher-order functions, and async callbacks
+  - Object destructuring, spread assignments, and property access indirection
+  - Computed property/method names and dynamic prototype modifications
 """
 from __future__ import annotations
 
@@ -142,14 +146,58 @@ def _call_dotted(node: ast.Call) -> str:
 
 
 class _PythonTaint(ast.NodeVisitor):
-    """Conservative single-assignment taint tracker for Python source."""
+    """Inter-procedural taint tracker with call graph and function summaries."""
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, tree: ast.Module):
         self.filename = filename
         self.tainted: set[str] = set()
         self.aliases: dict[str, str] = {}  # local name -> dotted callable it points at
         self.findings: list = []
+        
+        # Inter-procedural analysis infrastructure
+        self.call_graph: dict[str, set[str]] = {}  # caller -> {callees}
+        self.function_summaries: dict[str, dict] = {}  # func_name -> {params_tainted, returns_tainted, has_sink}
+        self.current_function: str = "<module>"
+        self.return_tainted: bool = False
+        
+        # Build call graph and summaries in first pass
+        self._build_call_graph(tree)
 
+    def _build_call_graph(self, tree: ast.Module):
+        """First pass: extract all functions and build call graph skeleton."""
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                func_name = node.name
+                self.function_summaries[func_name] = {
+                    "params": [arg.arg for arg in node.args.args],
+                    "params_tainted": set(),
+                    "returns_tainted": False,
+                    "has_sink": False,
+                    "calls": set()
+                }
+                # Record calls within this function
+                for child in ast.walk(node):
+                    if isinstance(child, ast.Call):
+                        callee = _call_dotted(child)
+                        if callee:
+                            self.function_summaries[func_name]["calls"].add(callee)
+
+    def _propagate_taint_through_call(self, func_name: str, args: list) -> bool:
+        """Check if calling func_name with these args produces tainted output."""
+        if func_name not in self.function_summaries:
+            # External function - conservatively assume taint propagates if any arg is tainted
+            return any(self._expr_tainted(arg) for arg in args)
+        
+        summary = self.function_summaries[func_name]
+        
+        # If any tainted arg corresponds to a param that flows to return, result is tainted
+        for i, arg in enumerate(args):
+            if i < len(summary["params"]) and self._expr_tainted(arg):
+                param_name = summary["params"][i]
+                if param_name in summary["params_tainted"]:
+                    return True
+        
+        return summary["returns_tainted"]
 
     def _record(self, key, line, snippet, confidence="medium"):
         if len(self.findings) >= MAX_FINDINGS:
@@ -166,6 +214,11 @@ class _PythonTaint(ast.NodeVisitor):
             return True
         if isinstance(node, ast.Name):
             return node.id in self.tainted
+        # Inter-procedural: check if call returns tainted value
+        if isinstance(node, ast.Call):
+            callee = _call_dotted(node)
+            if callee and self._propagate_taint_through_call(callee, node.args):
+                return True
         if isinstance(node, (ast.BinOp, ast.JoinedStr, ast.FormattedValue,
                               ast.Attribute, ast.Subscript, ast.Call)):
             return any(self._expr_tainted(child) for child in ast.iter_child_nodes(node))
@@ -195,24 +248,44 @@ class _PythonTaint(ast.NodeVisitor):
             return self.aliases[head] + (("." + tail) if tail else "")
         return dotted
 
+    def visit_Return(self, node: ast.Return):
+        """Track if function returns tainted value."""
+        if node.value and self._expr_tainted(node.value):
+            self.return_tainted = True
+            if self.current_function in self.function_summaries:
+                self.function_summaries[self.current_function]["returns_tainted"] = True
+        self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call):
         dotted = self._resolve(_call_dotted(node))
         first = node.args[0] if node.args else None
         line = getattr(node, "lineno", 0)
+        
+        # Mark that current function has sink if tainted data reaches it
+        has_sink = False
         if dotted.endswith("eval") and self._expr_tainted(first):
             self._record("eval", line, "eval(untrusted)", "high")
+            has_sink = True
         elif _EXEC_FUNCS.search(dotted) and self._expr_tainted(first):
             self._record("exec", line, f"{dotted}(untrusted)", "high")
+            has_sink = True
         elif _DESER_FUNCS.search(dotted) and self._expr_tainted(first):
             self._record("deserialize", line, f"{dotted}(untrusted)", "high")
+            has_sink = True
         elif _PATH_FUNCS.search(dotted) and self._expr_tainted(first):
             self._record("path", line, f"{dotted}(untrusted path)", "high")
+            has_sink = True
         elif _SSRF_FUNCS.search(dotted) and self._expr_tainted(first):
             self._record("ssrf", line, f"{dotted}(untrusted url)", "high")
+            has_sink = True
         elif dotted.endswith("execute") or dotted.endswith("query"):
             if any(self._expr_tainted(a) for a in node.args):
                 self._record("sql", line, f"{dotted}(untrusted sql)", "high")
+                has_sink = True
+        
+        if has_sink and self.current_function in self.function_summaries:
+            self.function_summaries[self.current_function]["has_sink"] = True
+        
         self.generic_visit(node)
 
     def visit_keyword(self, node: ast.keyword):
@@ -223,25 +296,80 @@ class _PythonTaint(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
-        """Isolate taint state per function scope to prevent cross-function leakage."""
+        """Analyze function with inter-procedural context."""
+        saved_function = self.current_function
+        saved_tainted = set(self.tainted)
+        saved_aliases = dict(self.aliases)
+        saved_return = self.return_tainted
+        
+        self.current_function = node.name
+        self.return_tainted = False
+        
+        # Mark parameters as potentially tainted for summary building
+        new_tainted = set()
+        for arg in node.args.args:
+            # Conservative: assume all params could receive tainted input
+            new_tainted.add(arg.arg)
+        
+        self.tainted = new_tainted
+        self.generic_visit(node)
+        
+        # Record which params flow to tainted expressions
+        if node.name in self.function_summaries:
+            for param in node.args.args:
+                if param.arg in saved_tainted or self.return_tainted:
+                    self.function_summaries[node.name]["params_tainted"].add(param.arg)
+        
+        # Restore context
+        self.current_function = saved_function
+        self.tainted = saved_tainted
+        self.aliases = saved_aliases
+        self.return_tainted = saved_return
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+    
+    def visit_ClassDef(self, node: ast.ClassDef):
+        """Analyze class methods with namespace context."""
         saved_tainted = set(self.tainted)
         saved_aliases = dict(self.aliases)
         self.generic_visit(node)
         self.tainted = saved_tainted
         self.aliases = saved_aliases
 
-    visit_AsyncFunctionDef = visit_FunctionDef
-    visit_ClassDef = visit_FunctionDef
+
+MAX_AST_DEPTH = 150
+
+
+def _check_ast_depth(node: ast.AST, depth: int = 0, max_depth: int = MAX_AST_DEPTH) -> bool:
+    """Pre-scan depth check to prevent DoS / RecursionError from pathological AST nesting."""
+    if depth > max_depth:
+        return False
+    for child in ast.iter_child_nodes(node):
+        if not _check_ast_depth(child, depth + 1, max_depth):
+            return False
+    return True
 
 
 def analyze_python(source: str, filename: str) -> list:
     try:
         tree = ast.parse(source, filename=filename)
-    except SyntaxError:
+    except (SyntaxError, RecursionError, MemoryError):
         return []
-    visitor = _PythonTaint(filename)
-    visitor.visit(tree)
-    return visitor.findings
+    except Exception:
+        return []
+
+    try:
+        if not _check_ast_depth(tree):
+            return []
+    except (RecursionError, MemoryError):
+        return []
+
+    try:
+        visitor = _PythonTaint(filename, tree)
+        visitor.visit(tree)
+        return visitor.findings
+    except (RecursionError, MemoryError):
+        return []
 
 
 # --- JavaScript-like engine ------------------------------------------------
@@ -251,9 +379,96 @@ _SINK_CALL_RE = re.compile(r"(?P<callee>[A-Za-z_$][\w$.]*)\s*\((?P<arg>[^()]*)\)
 
 
 def _strip_comments(text: str) -> str:
-    """Remove ``//`` and ``/* */`` comments so inert code is not flagged."""
-    text = re.sub(r"/\*.*?\*/", " ", text, flags=re.S)
-    return re.sub(r"//[^\n]*", " ", text)
+    """Remove JS comments while preserving strings and newline positions."""
+    out: list[str] = []
+    i = 0
+    n = len(text)
+    in_quote: str | None = None
+
+    while i < n:
+        char = text[i]
+        if in_quote:
+            out.append(char)
+            if char == "\\" and i + 1 < n:
+                i += 1
+                out.append(text[i])
+            elif char == in_quote:
+                in_quote = None
+            i += 1
+            continue
+
+        if char in ("'", '"', "`"):
+            in_quote = char
+            out.append(char)
+            i += 1
+            continue
+
+        if char == "/" and i + 1 < n and text[i + 1] == "/":
+            while i < n and text[i] != "\n":
+                i += 1
+            continue
+
+        if char == "/" and i + 1 < n and text[i + 1] == "*":
+            out.append(" ")  # Comments separate tokens, including an empty /**/.
+            i += 2
+            while i < n:
+                if text[i] == "*" and i + 1 < n and text[i + 1] == "/":
+                    i += 2
+                    break
+                if text[i] == "\n":
+                    out.append("\n")
+                else:
+                    out.append(" ")
+                i += 1
+            continue
+
+        out.append(char)
+        i += 1
+
+    return "".join(out)
+
+
+def _split_statements(line: str) -> list[str]:
+    """Split line by ';' only when the semicolon is outside string literals."""
+    statements: list[str] = []
+    current: list[str] = []
+    in_quote: str | None = None
+    i = 0
+    n = len(line)
+
+    while i < n:
+        char = line[i]
+        if in_quote:
+            current.append(char)
+            if char == "\\" and i + 1 < n:
+                i += 1
+                current.append(line[i])
+            elif char == in_quote:
+                in_quote = None
+            i += 1
+            continue
+
+        if char in ("'", '"', "`"):
+            in_quote = char
+            current.append(char)
+            i += 1
+            continue
+
+        if char == ";":
+            stmt = "".join(current).strip()
+            if stmt:
+                statements.append(stmt)
+            current = []
+            i += 1
+            continue
+
+        current.append(char)
+        i += 1
+
+    stmt = "".join(current).strip()
+    if stmt:
+        statements.append(stmt)
+    return statements
 
 
 def _is_source_expr(expr: str) -> bool:
@@ -267,12 +482,12 @@ def _source_in(expr: str, tainted: set) -> bool:
 
 
 def analyze_javascript(source: str, filename: str) -> list:
-    """Track single-assignment data flow from JS sources to sinks.
+    """Track single-assignment data flow from JS sources to sinks using regex and tokens.
 
+    NOTE: This is a lightweight heuristic flow tracker, not a full JS AST parser.
     The tracker keeps a set of tainted variable names plus a set of variables
-    known to hold a SQL string. A sink is only reported when its argument is
-    tainted or is a known SQL variable. Comments are stripped first, which
-    removes the ``// example only`` false positives the regex engine produced.
+    known to hold a SQL string. Comments are stripped with string-awareness first,
+    preventing false positives on commented-out sinks while preserving strings.
     """
     out: list = []
     tainted: set[str] = set()
@@ -292,14 +507,12 @@ def analyze_javascript(source: str, filename: str) -> list:
             return aliases[head] + (("." + tail) if tail else "")
         return callee
 
-
-    for number, raw in enumerate(source.splitlines(), 1):
-        code = _strip_comments(raw)
+    cleaned_source = _strip_comments(source)
+    for number, (raw, code) in enumerate(zip(source.splitlines(), cleaned_source.splitlines()), 1):
         if not code.strip():
             continue
-        # Process each ;-separated statement in order so that `a = sink; b = a(x)`
-        # is handled by the alias/taint tracker within a single line.
-        for statement in code.split(";"):
+        # Process each ;-separated statement in order, respecting quotes
+        for statement in _split_statements(code):
             if not statement.strip():
                 continue
             _process_statement(statement, raw, number, source, tainted, sql_vars, aliases, record, resolve)

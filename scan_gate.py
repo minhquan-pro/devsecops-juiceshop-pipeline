@@ -22,6 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_EVIDENCE = ROOT / "evidence" / "validation.json"
+DEFAULT_AI_EVIDENCE = ROOT / "evidence" / "ai_benchmark.json"
 
 
 def load_summary(path: Path) -> dict:
@@ -37,13 +38,24 @@ def main() -> int:
     parser.add_argument("--min-precision", type=float, default=0.0)
     parser.add_argument("--min-recall", type=float, default=0.0)
     parser.add_argument("--min-holdout-f1", type=float, default=0.0)
+    parser.add_argument("--min-external-f1", type=float, default=0.0)
+    parser.add_argument("--min-external-recall", type=float, default=0.0)
     parser.add_argument("--max-p95-ms", type=float, default=None)
     parser.add_argument("--require-tests-pass", action="store_true")
+    parser.add_argument("--require-ai-gate", action="store_true", help="Enforce quality floors on ML model benchmark")
+    parser.add_argument("--ai-evidence", type=Path, default=DEFAULT_AI_EVIDENCE)
+    parser.add_argument("--min-ai-f1", type=float, default=0.0)
+    parser.add_argument("--min-ai-auc", type=float, default=0.0)
+    parser.add_argument("--min-ai-cv-f1", type=float, default=0.0, help="Floor for 5-Fold Cross-Validation F1-score (Default: 0.70 if --require-ai-gate)")
+    parser.add_argument("--min-ai-cv-auc", type=float, default=0.0, help="Floor for 5-Fold Cross-Validation ROC-AUC (Default: 0.75 if --require-ai-gate)")
+    parser.add_argument("--max-ai-brier-score", type=float, default=None, help="Ceiling for Brier calibration loss (Default: 0.15 if --require-ai-gate)")
+    parser.add_argument("--max-ai-latency-ms", type=float, default=None)
     args = parser.parse_args()
 
     summary = load_summary(args.evidence)
     corpus = summary.get("corpus", {})
     holdout = summary.get("holdout", {})
+    external = summary.get("external", {})
     benchmark = summary.get("benchmark", {})
     tests = summary.get("unit_tests", {})
 
@@ -67,10 +79,16 @@ def main() -> int:
     metric("corpus.f1", corpus.get("f1"), args.min_f1)
     metric("corpus.precision", corpus.get("precision"), args.min_precision)
     metric("corpus.recall", corpus.get("recall"), args.min_recall)
-    # The holdout set is the honest generalization check: it is never used to
-    # tune rules, so its floor is the strongest statement in this gate.
+    # The holdout set is an internal synthetic micro-benchmark used as a regression
+    # floor to verify that rule changes do not cause unforeseen regressions.
     if holdout:
         metric("holdout.f1", holdout.get("f1"), args.min_holdout_f1)
+    # The external dataset evaluates zero-tuning out-of-sample generalizability
+    # across real public CVE snippets.
+    if external and args.min_external_f1 > 0:
+        metric("external.f1", external.get("f1"), args.min_external_f1)
+    if external and args.min_external_recall > 0:
+        metric("external.recall", external.get("recall"), args.min_external_recall)
 
     if args.max_p95_ms is not None:
         p95 = benchmark.get("p95_nearest_rank")
@@ -80,6 +98,64 @@ def main() -> int:
             failures.append(f"p95 latency {p95:.1f}ms exceeds the ceiling {args.max_p95_ms:.1f}ms")
         else:
             print(f"[gate] p95 latency {p95:.1f}ms <= {args.max_p95_ms:.1f}ms OK")
+
+    # AI Quality Gate verification
+    if (
+        args.require_ai_gate
+        or args.min_ai_f1 > 0
+        or args.min_ai_auc > 0
+        or args.min_ai_cv_f1 > 0
+        or args.min_ai_cv_auc > 0
+        or args.max_ai_latency_ms is not None
+    ):
+        if not args.ai_evidence.is_file():
+            failures.append(f"AI evidence not found: {args.ai_evidence}. Run labs/train_ai_model.py first.")
+        else:
+            try:
+                ai_data = json.loads(args.ai_evidence.read_text(encoding="utf-8"))
+                holdout_eval = ai_data.get("holdout_evaluation", {})
+                ai_f1 = holdout_eval.get("f1")
+                ai_auc = holdout_eval.get("roc_auc")
+                latency_info = ai_data.get("latency_benchmark", {})
+                ai_lat = latency_info.get("mean_latency_ms")
+
+                if args.min_ai_f1 > 0 or args.require_ai_gate:
+                    floor_f1 = args.min_ai_f1 if args.min_ai_f1 > 0 else 0.80
+                    metric("ai_model.holdout_f1", ai_f1, floor_f1)
+
+                if args.min_ai_auc > 0 or args.require_ai_gate:
+                    floor_auc = args.min_ai_auc if args.min_ai_auc > 0 else 0.85
+                    metric("ai_model.roc_auc", ai_auc, floor_auc)
+
+                # Cross-Validation rigor check (Audit Bypass Prevention: Mandate CV floors when --require-ai-gate is enabled)
+                cv_summary = ai_data.get("cross_validation_5_folds", {}).get("summary", {})
+                cv_f1 = cv_summary.get("f1", {}).get("mean") if isinstance(cv_summary.get("f1"), dict) else None
+                cv_auc = cv_summary.get("roc_auc", {}).get("mean") if isinstance(cv_summary.get("roc_auc"), dict) else None
+
+                if args.min_ai_cv_f1 > 0 or args.require_ai_gate:
+                    floor_cv_f1 = args.min_ai_cv_f1 if args.min_ai_cv_f1 > 0 else 0.70
+                    metric("ai_model.cv_f1", cv_f1, floor_cv_f1)
+
+                if args.min_ai_cv_auc > 0 or args.require_ai_gate:
+                    floor_cv_auc = args.min_ai_cv_auc if args.min_ai_cv_auc > 0 else 0.75
+                    metric("ai_model.cv_auc", cv_auc, floor_cv_auc)
+
+                # Calibration check: Brier score loss
+                holdout_brier = holdout_eval.get("brier_score")
+                if holdout_brier is not None and (args.require_ai_gate or args.max_ai_brier_score is not None):
+                    ceiling_brier = args.max_ai_brier_score if args.max_ai_brier_score is not None else 0.15
+                    if holdout_brier > ceiling_brier:
+                        failures.append(f"ai_model.holdout_brier {holdout_brier:.4f} exceeds ceiling {ceiling_brier:.4f}")
+                    else:
+                        print(f"[gate] ai_model.holdout_brier {holdout_brier:.4f} <= {ceiling_brier:.4f} OK")
+
+                if args.max_ai_latency_ms is not None and ai_lat is not None:
+                    if ai_lat > args.max_ai_latency_ms:
+                        failures.append(f"AI latency {ai_lat:.2f}ms exceeds the ceiling {args.max_ai_latency_ms:.1f}ms")
+                    else:
+                        print(f"[gate] AI latency {ai_lat:.2f}ms <= {args.max_ai_latency_ms:.1f}ms OK")
+            except Exception as e:
+                failures.append(f"Error parsing AI benchmark evidence: {e}")
 
     if failures:
         print("\n[gate] FAILED:", file=sys.stderr)

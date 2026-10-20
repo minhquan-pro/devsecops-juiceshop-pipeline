@@ -1,0 +1,187 @@
+/**
+ * evondevkit-modern - Design Tokens Architecture
+ * Architecture: CSS Cascade Layers, OKLCH Color Space, Fluid Typography & Spacing
+ */
+
+/* 1. Thiết lập CSS Cascade Layers theo thứ tự ưu tiên */
+@layer reset, tokens, base, composition, components, utilities;
+
+@layer tokens {
+  /* ==========================================================================
+     Root Design Tokens (Fluid Scales, Radii, Transitions, Elevation)
+     ========================================================================== */
+  :root {
+    /* ------------------------------------------------------------------------
+       Fluid Typography Scale (Viewport 320px -> 1440px | Base 16px)
+       Công thức: clamp(min, preferred [slope * vi + intercept], max)
+       ------------------------------------------------------------------------ */
+    --font-size-xs:   clamp(0.75rem, 0.7321rem + 0.0893vi, 0.8125rem); /* 12px -> 13px */
+    --font-size-sm:   clamp(0.875rem, 0.8571rem + 0.0893vi, 0.9375rem); /* 14px -> 15px */
+    --font-size-base: clamp(1rem, 0.9643rem + 0.1786vi, 1.125rem);       /* 16px -> 18px */
+    --font-size-md:   clamp(1.125rem, 1.0893rem + 0.1786vi, 1.25rem);    /* 18px -> 20px */
+    --font-size-lg:   clamp(1.25rem, 1.1786rem + 0.3571vi, 1.5rem);      /* 20px -> 24px */
+    --font-size-xl:   clamp(1.5rem, 1.3571rem + 0.7143vi, 2rem);         /* 24px -> 32px */
+    --font-size-2xl:  clamp(2rem, 1.7857rem + 1.0714vi, 2.75rem);        /* 32px -> 44px */
+    --font-size-3xl:  clamp(2.5rem, 2.1429rem + 1.7857vi, 3.75rem);      /* 40px -> 60px */
+
+    /* Typography Metrics */
+    --font-family-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-family-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+    --line-height-tight: 1.15;
+    --line-height-snug: 1.3;
+    --line-height-base: 1.5;
+    --line-height-loose: 1.75;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* ------------------------------------------------------------------------
+       Fluid Spacing Scale (Viewport 320px -> 1440px)
+       ------------------------------------------------------------------------ */
+    --space-2xs: clamp(0.25rem, 0.2143rem + 0.1786vi, 0.375rem); /* 4px -> 6px */
+    --space-xs:  clamp(0.5rem, 0.4643rem + 0.1786vi, 0.625rem);   /* 8px -> 10px */
+    --space-sm:  clamp(0.75rem, 0.6786rem + 0.3571vi, 1rem);      /* 12px -> 16px */
+    --space-md:  clamp(1rem, 0.8571rem + 0.7143vi, 1.5rem);       /* 16px -> 24px */
+    --space-lg:  clamp(1.5rem, 1.2857rem + 1.0714vi, 2.25rem);    /* 24px -> 36px */
+    --space-xl:  clamp(2rem, 1.7143rem + 1.4286vi, 3rem);         /* 32px -> 48px */
+    --space-2xl: clamp(3rem, 2.5714rem + 2.1429vi, 4.5rem);       /* 48px -> 72px */
+    --space-3xl: clamp(4rem, 3.4286rem + 2.8571vi, 6rem);         /* 64px -> 96px */
+
+    /* ------------------------------------------------------------------------
+       Border Radius Tokens
+       ------------------------------------------------------------------------ */
+    --radius-xs: 0.25rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+
+    /* ------------------------------------------------------------------------
+       Transitions & Motion Tokens
+       ------------------------------------------------------------------------ */
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+    --ease-accelerate: cubic-bezier(0.3, 0, 1, 1);
+    --transition-fast: 150ms var(--ease-standard);
+    --transition-normal: 250ms var(--ease-standard);
+    --transition-slow: 350ms var(--ease-standard);
+
+    /* ------------------------------------------------------------------------
+       Light Theme Colors (OKLCH System - WCAG 2.2 AA Contrast >= 4.5:1)
+       ------------------------------------------------------------------------ */
+    color-scheme: light;
+
+    /* Brand Tokens */
+    --color-brand-primary: oklch(0.55 0.22 264);       /* Deep vibrant Indigo */
+    --color-brand-secondary: oklch(0.62 0.16 168);     /* Vivid Teal */
+
+    /* Surface Tokens */
+    --color-surface-base: oklch(0.99 0.002 264);       /* Clean canvas */
+    --color-surface-raised: oklch(0.96 0.006 264);     /* Cards, nested containers */
+    --color-surface-overlay: oklch(1 0 0);             /* Modals, flyouts */
+
+    /* Text Tokens (Đảm bảo contrast so với surface-base >= 4.5:1) */
+    --color-text-primary: oklch(0.18 0.02 264);        /* Ratio ~14:1 */
+    --color-text-secondary: oklch(0.42 0.03 264);      /* Ratio ~5.5:1 */
+    --color-text-muted: oklch(0.48 0.02 264);          /* Ratio ~4.6:1 */
+
+    /* Border Tokens */
+    --color-border-subtle: oklch(0.90 0.01 264);
+    --color-border-strong: oklch(0.72 0.03 264);
+
+    /* Status Tokens */
+    --color-status-success: oklch(0.56 0.19 142);      /* AA readable green */
+    --color-status-warning: oklch(0.66 0.18 68);       /* AA readable amber */
+    --color-status-danger: oklch(0.54 0.22 28);        /* AA readable crimson */
+
+    /* Focus Ring */
+    --color-focus-ring: oklch(0.55 0.24 264);
+
+    /* ------------------------------------------------------------------------
+       Elevation Shadows (OKLCH Ambient + Direct composite)
+       ------------------------------------------------------------------------ */
+    --shadow-color-ambient: oklch(0.18 0.02 264 / 0.06);
+    --shadow-color-direct: oklch(0.18 0.02 264 / 0.12);
+
+    --shadow-sm:
+      0 1px 2px var(--shadow-color-ambient),
+      0 1px 3px var(--shadow-color-direct);
+    --shadow-md:
+      0 4px 6px -1px var(--shadow-color-ambient),
+      0 2px 4px -2px var(--shadow-color-direct);
+    --shadow-lg:
+      0 10px 15px -3px var(--shadow-color-ambient),
+      0 4px 6px -4px var(--shadow-color-direct);
+    --shadow-xl:
+      0 20px 25px -5px var(--shadow-color-ambient),
+      0 8px 10px -6px var(--shadow-color-direct);
+  }
+
+  /* --------------------------------------------------------------------------
+     Dark Theme Tokens (Hỗ trợ prefers-color-scheme và gán cứng data-theme)
+     -------------------------------------------------------------------------- */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+
+      /* Brand Tokens (Được điều chỉnh để pop trên nền tối) */
+      --color-brand-primary: oklch(0.70 0.18 264);
+      --color-brand-secondary: oklch(0.74 0.14 168);
+
+      /* Surface Tokens */
+      --color-surface-base: oklch(0.14 0.015 264);
+      --color-surface-raised: oklch(0.19 0.02 264);
+      --color-surface-overlay: oklch(0.24 0.025 264);
+
+      /* Text Tokens (Contrast so với surface-base >= 4.5:1) */
+      --color-text-primary: oklch(0.96 0.005 264);     /* Ratio ~13:1 */
+      --color-text-secondary: oklch(0.78 0.015 264);   /* Ratio ~7.2:1 */
+      --color-text-muted: oklch(0.65 0.02 264);       /* Ratio ~4.6:1 */
+
+      /* Border Tokens */
+      --color-border-subtle: oklch(0.28 0.02 264);
+      --color-border-strong: oklch(0.42 0.03 264);
+
+      /* Status Tokens */
+      --color-status-success: oklch(0.74 0.16 142);
+      --color-status-warning: oklch(0.78 0.15 68);
+      --color-status-danger: oklch(0.70 0.19 28);
+
+      /* Focus Ring */
+      --color-focus-ring: oklch(0.72 0.20 264);
+
+      /* Dark Mode Shadow Elevation */
+      --shadow-color-ambient: oklch(0 0 0 / 0.35);
+      --shadow-color-direct: oklch(0 0 0 / 0.5);
+    }
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    --color-brand-primary: oklch(0.70 0.18 264);
+    --color-brand-secondary: oklch(0.74 0.14 168);
+
+    --color-surface-base: oklch(0.14 0.015 264);
+    --color-surface-raised: oklch(0.19 0.02 264);
+    --color-surface-overlay: oklch(0.24 0.025 264);
+
+    --color-text-primary: oklch(0.96 0.005 264);
+    --color-text-secondary: oklch(0.78 0.015 264);
+    --color-text-muted: oklch(0.65 0.02 264);
+
+    --color-border-subtle: oklch(0.28 0.02 264);
+    --color-border-strong: oklch(0.42 0.03 264);
+
+    --color-status-success: oklch(0.74 0.16 142);
+    --color-status-warning: oklch(0.78 0.15 68);
+    --color-status-danger: oklch(0.70 0.19 28);
+
+    --color-focus-ring: oklch(0.72 0.20 264);
+
+    --shadow-color-ambient: oklch(0 0 0 / 0.35);
+    --shadow-color-direct: oklch(0 0 0 / 0.5);
+  }
+}

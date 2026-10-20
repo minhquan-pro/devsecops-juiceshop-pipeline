@@ -1,25 +1,77 @@
+test_classifier_initialization (test_ai_classifier.VulnerabilityAIClassifierTests.test_classifier_initialization)
+Classifier should initialize successfully in ML or Heuristic mode. ... ok
+test_dataset_integrity (test_ai_classifier.VulnerabilityAIClassifierTests.test_dataset_integrity)
+Validate datasets exist and have consistent JSON schema. ... ok
+test_empty_or_invalid_code_handling (test_ai_classifier.VulnerabilityAIClassifierTests.test_empty_or_invalid_code_handling)
+Empty or invalid code should safely return zero confidence without crashing. ... ok
+test_fallback_mode_on_invalid_model_path (test_ai_classifier.VulnerabilityAIClassifierTests.test_fallback_mode_on_invalid_model_path)
+When given an invalid model path, classifier safely falls back to heuristic mode. ... ok
+test_get_detailed_explanation (test_ai_classifier.VulnerabilityAIClassifierTests.test_get_detailed_explanation)
+Test XAI explanation breakdown with active AST features. ... ok
+test_model_sha256_checksum_verification (test_ai_classifier.VulnerabilityAIClassifierTests.test_model_sha256_checksum_verification)
+Model file integrity must match SHA-256 checksum to prevent pickle deserialization RCE. ... ok
+test_predict_batch (test_ai_classifier.VulnerabilityAIClassifierTests.test_predict_batch)
+Batch prediction returns consistent results matching individual predict_code. ... ok
+test_predict_code_safe_vs_vulnerable (test_ai_classifier.VulnerabilityAIClassifierTests.test_predict_code_safe_vs_vulnerable)
+Classifier predicts high confidence for dangerous code and low confidence for safe code. ... ok
+test_probabilistic_score_fusion (test_ai_classifier.VulnerabilityAIClassifierTests.test_probabilistic_score_fusion)
+Test Bayesian logit score fusion handles monotonic probabilities and edge cases. ... ok
+test_rescore_ast_findings (test_ai_classifier.VulnerabilityAIClassifierTests.test_rescore_ast_findings)
+Rescoring should attach ai_confidence and ai_rescored metadata to findings. ... ok
+test_tampered_model_integrity_rejection (test_ai_classifier.VulnerabilityAIClassifierTests.test_tampered_model_integrity_rejection)
+Tampered model should fail checksum verification and fall back to safe heuristic. ... ok
 test_active_must_be_boolean (test_api.ApiTests.test_active_must_be_boolean) ... ok
+test_ai_hybrid_must_be_boolean (test_api.ApiTests.test_ai_hybrid_must_be_boolean) ... ok
+test_ai_predict_post (test_api.ApiTests.test_ai_predict_post) ... ok
+test_ai_telemetry_get (test_api.ApiTests.test_ai_telemetry_get) ... ok
 test_bad_host (test_api.ApiTests.test_bad_host) ... ok
 test_bad_origin (test_api.ApiTests.test_bad_origin) ... ok
 test_concurrent_scan_rejected (test_api.ApiTests.test_concurrent_scan_rejected) ... ok
 test_content_security_policy (test_api.ApiTests.test_content_security_policy) ... ok
 test_no_csrf (test_api.ApiTests.test_no_csrf) ... ok
 test_non_object_json (test_api.ApiTests.test_non_object_json) ... ok
+test_openapi_fuzz_must_be_boolean (test_api.ApiTests.test_openapi_fuzz_must_be_boolean) ... ok
 test_public_target_rejected (test_api.ApiTests.test_public_target_rejected) ... ok
+test_scan_hybrid_telemetry_included (test_api.ApiTests.test_scan_hybrid_telemetry_included) ... ok
 test_source_api (test_api.ApiTests.test_source_api) ... ok
 test_ui (test_api.ApiTests.test_ui) ... ok
 test_unknown_path (test_api.ApiTests.test_unknown_path) ... ok
 test_wrong_content_type (test_api.ApiTests.test_wrong_content_type) ... ok
+test_extract_client_scripts_empty (test_core.HybridClientScriptTests.test_extract_client_scripts_empty) ... ok
+test_extract_client_scripts_inline_and_external (test_core.HybridClientScriptTests.test_extract_client_scripts_inline_and_external) ... ok
+test_intraprocedural_still_works (test_core.InterproceduralTaintTests.test_intraprocedural_still_works) ... ok
+test_method_call_taint_tracking (test_core.InterproceduralTaintTests.test_method_call_taint_tracking) ... ok
+test_multihop_taint_propagation (test_core.InterproceduralTaintTests.test_multihop_taint_propagation) ... ok
+test_recursive_function_handled (test_core.InterproceduralTaintTests.test_recursive_function_handled) ... ok
+test_return_value_taint (test_core.InterproceduralTaintTests.test_return_value_taint) ... ok
+test_simple_function_call_propagates_taint (test_core.InterproceduralTaintTests.test_simple_function_call_propagates_taint) ... ok
+test_taint_not_propagated_when_safe (test_core.InterproceduralTaintTests.test_taint_not_propagated_when_safe) ... ok
 test_exploit_script_refuses_non_loopback (test_core.LabScriptTests.test_exploit_script_refuses_non_loopback) ... ok
+test_idor_cross_owner_vulnerable (test_core.LabScriptTests.test_idor_cross_owner_vulnerable) ... ok
+test_idor_http_errors (test_core.LabScriptTests.test_idor_http_errors) ... ok
+test_idor_malformed_response_inconclusive (test_core.LabScriptTests.test_idor_malformed_response_inconclusive) ... ok
+test_idor_missing_identity_inconclusive (test_core.LabScriptTests.test_idor_missing_identity_inconclusive) ... ok
+test_idor_same_owner_not_vulnerable (test_core.LabScriptTests.test_idor_same_owner_not_vulnerable) ... ok
 test_jwt_claims_decoded (test_core.LabScriptTests.test_jwt_claims_decoded) ... ok
+test_redaction_case_insensitive_and_compound_keys (test_core.LabScriptTests.test_redaction_case_insensitive_and_compound_keys) ... ok
 test_redaction_masks_jwt (test_core.LabScriptTests.test_redaction_masks_jwt) ... ok
 test_redaction_masks_sensitive_keys (test_core.LabScriptTests.test_redaction_masks_sensitive_keys) ... ok
+test_redaction_text_headers_bearer_and_query (test_core.LabScriptTests.test_redaction_text_headers_bearer_and_query) ... ok
 test_token_preview_truncated (test_core.LabScriptTests.test_token_preview_truncated) ... ok
 test_active_request_count (test_core.NetworkTests.test_active_request_count) ... ok
 test_baseline_request_count (test_core.NetworkTests.test_baseline_request_count) ... ok
 test_body_not_persisted (test_core.NetworkTests.test_body_not_persisted) ... ok
 test_cookie_redacted (test_core.NetworkTests.test_cookie_redacted) ... ok
 test_unknown_path_denied (test_core.NetworkTests.test_unknown_path_denied) ... ok
+test_discover_endpoints_network_error (test_core.OpenAPIFuzzerTests.test_discover_endpoints_network_error) ... ok
+test_discover_endpoints_with_mock_server (test_core.OpenAPIFuzzerTests.test_discover_endpoints_with_mock_server) ... ok
+test_discovered_endpoints_limit (test_core.OpenAPIFuzzerTests.test_discovered_endpoints_limit) ... ok
+test_generate_integer_fuzz_payloads (test_core.OpenAPIFuzzerTests.test_generate_integer_fuzz_payloads) ... ok
+test_generate_string_fuzz_payloads (test_core.OpenAPIFuzzerTests.test_generate_string_fuzz_payloads) ... ok
+test_parse_malformed_json (test_core.OpenAPIFuzzerTests.test_parse_malformed_json) ... ok
+test_parse_openapi_v3_spec (test_core.OpenAPIFuzzerTests.test_parse_openapi_v3_spec) ... ok
+test_parse_swagger_v2_spec (test_core.OpenAPIFuzzerTests.test_parse_swagger_v2_spec) ... ok
+test_scan_with_openapi_discovery_flag (test_core.OpenAPIFuzzerTests.test_scan_with_openapi_discovery_flag) ... ok
 test_benign_jwt_preview_not_flagged (test_core.RuleTests.test_benign_jwt_preview_not_flagged) ... ok
 test_directory_not_traversal (test_core.RuleTests.test_directory_not_traversal) ... ok
 test_error_not_confirmed_sqli (test_core.RuleTests.test_error_not_confirmed_sqli) ... ok
@@ -28,6 +80,9 @@ test_flow_engine_catches_intermediate_variable (test_core.RuleTests.test_flow_en
 test_flow_engine_catches_multiline_sql (test_core.RuleTests.test_flow_engine_catches_multiline_sql) ... ok
 test_headers_missing (test_core.RuleTests.test_headers_missing) ... ok
 test_headers_present (test_core.RuleTests.test_headers_present) ... ok
+test_js_analyzer_robustness_on_malformed_input (test_core.RuleTests.test_js_analyzer_robustness_on_malformed_input) ... ok
+test_js_analyzer_unsupported_flows_documented (test_core.RuleTests.test_js_analyzer_unsupported_flows_documented) ... ok
+test_js_comment_stripping_preserves_strings_and_semicolons (test_core.RuleTests.test_js_comment_stripping_preserves_strings_and_semicolons) ... ok
 test_json_does_not_need_html_headers (test_core.RuleTests.test_json_does_not_need_html_headers) ... ok
 test_jwt_decode_for_authorization_flagged (test_core.RuleTests.test_jwt_decode_for_authorization_flagged) ... ok
 test_known_regex_false_negative (test_core.RuleTests.test_known_regex_false_negative) ... ok
@@ -46,12 +101,13 @@ test_spa_200_not_metrics (test_core.RuleTests.test_spa_200_not_metrics) ... ok
 test_spa_200_not_swagger (test_core.RuleTests.test_spa_200_not_swagger) ... ok
 test_static_string_sink_not_flagged (test_core.RuleTests.test_static_string_sink_not_flagged) ... ok
 test_swagger_marker (test_core.RuleTests.test_swagger_marker) ... ok
+test_exploit_validate_target (test_core.TargetTests.test_exploit_validate_target) ... ok
 test_forbidden_targets (test_core.TargetTests.test_forbidden_targets) ... ok
 test_ipv6 (test_core.TargetTests.test_ipv6) ... ok
 test_localhost_pinned (test_core.TargetTests.test_localhost_pinned) ... ok
 test_loopback (test_core.TargetTests.test_loopback) ... ok
 
 ----------------------------------------------------------------------
-Ran 52 tests in 1.482s
+Ran 97 tests in 14.150s
 
 OK

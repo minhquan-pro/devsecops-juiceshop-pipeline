@@ -1,6 +1,7 @@
 services:
   juice-shop:
-    image: bkimminich/juice-shop:v15.0.0
+    # Immutable pinned image digest for strict academic reproducibility
+    image: bkimminich/juice-shop:v15.0.0@sha256:721fc2cf0de50f11181be391152a5509c25fb13d0a21852277d13e3871dd6cf2
     ports:
       - "127.0.0.1:3000:3000"
     restart: "no"

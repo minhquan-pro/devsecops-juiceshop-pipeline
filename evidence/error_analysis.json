@@ -1,0 +1,1323 @@
+{
+  "metadata": {
+    "title": "JuiceSec Static Analyzer Error & Failure Mode Analysis",
+    "generated_at_utc": "2026-10-20T09:35:22.590783+00:00",
+    "ruleset_sha256": {
+      "astscan.py": "a500481182af240e793dcf2c51d03b4ade9114fdd44708413e29d75d93c38b0a",
+      "core.py": "4da407b153bcfb22327b862825d43c92d25ceecbbb38b7774db91e7856925050"
+    },
+    "methodology": "Confusion Matrix Analysis (TP/FP/TN/FN) with 4-Mode Failure Diagnosis"
+  },
+  "datasets": {
+    "corpus": {
+      "dataset_name": "corpus.json",
+      "sample_count": 40,
+      "overall_metrics": {
+        "tp": 19,
+        "fp": 0,
+        "tn": 21,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "per_category_metrics": {
+        "XSS": {
+          "tp": 3,
+          "fp": 0,
+          "tn": 3,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0
+        },
+        "SQLI": {
+          "tp": 2,
+          "fp": 0,
+          "tn": 2,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0
+        },
+        "IDOR_BAC": {
+          "tp": 1,
+          "fp": 0,
+          "tn": 1,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0
+        },
+        "JWT": {
+          "tp": 2,
+          "fp": 0,
+          "tn": 2,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0
+        },
+        "MISC_CMD_DESER": {
+          "tp": 11,
+          "fp": 0,
+          "tn": 13,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0
+        }
+      },
+      "diagnostics": [
+        {
+          "id": "SQL01",
+          "category": "SQLI",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-SQL"
+          ],
+          "rationale": "Ghép trực tiếp dữ liệu request vào SQL."
+        },
+        {
+          "id": "SQL02",
+          "category": "SQLI",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Giá trị được truyền riêng bằng tham số."
+        },
+        {
+          "id": "SQL03",
+          "category": "SQLI",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-SQL"
+          ],
+          "rationale": "Nối chuỗi qua nhiều dòng nên regex một dòng bỏ sót."
+        },
+        {
+          "id": "SQL04",
+          "category": "SQLI",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Chuỗi nằm trong chú thích, không được thực thi."
+        },
+        {
+          "id": "XSS01",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-DOM",
+            "SAST-AST-XSS"
+          ],
+          "rationale": "Dữ liệu người dùng đi vào HTML sink."
+        },
+        {
+          "id": "XSS02",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Văn bản không được phân tích như HTML."
+        },
+        {
+          "id": "XSS03",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-XSS"
+          ],
+          "rationale": "Tên thuộc tính dựng động vượt regex."
+        },
+        {
+          "id": "XSS04",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Nguồn cố định không có dữ liệu không tin cậy."
+        },
+        {
+          "id": "XSS05",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-DOM",
+            "SAST-AST-XSS"
+          ],
+          "rationale": "Ghi nguồn URL vào bộ phân tích HTML."
+        },
+        {
+          "id": "XSS06",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Ví dụ trong chú thích tạo cảnh báo giả."
+        },
+        {
+          "id": "JWT01",
+          "category": "JWT",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-JWT",
+            "SAST-AST-JWT"
+          ],
+          "rationale": "Cấp quyền từ token chưa xác minh."
+        },
+        {
+          "id": "JWT02",
+          "category": "JWT",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Đoạn mã thể hiện API verify và thuật toán cố định; chưa đánh giá claim."
+        },
+        {
+          "id": "JWT03",
+          "category": "JWT",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Decode để xem trước, không cấp quyền."
+        },
+        {
+          "id": "JWT04",
+          "category": "JWT",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-JWT"
+          ],
+          "rationale": "Hàm wrapper không nằm trong mẫu regex."
+        },
+        {
+          "id": "CMD01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-EXEC",
+            "SAST-AST-CMD"
+          ],
+          "rationale": "Đầu vào người dùng chạy qua shell."
+        },
+        {
+          "id": "CMD02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Executable cố định và không qua shell trong ví dụ."
+        },
+        {
+          "id": "CMD03",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Chú thích không thực thi."
+        },
+        {
+          "id": "PATH01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-PATH",
+            "SAST-AST-PATH"
+          ],
+          "rationale": "Đường dẫn trực tiếp do request chi phối."
+        },
+        {
+          "id": "PATH02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Giả định approvedPath đã được kiểm tra theo mô tả corpus."
+        },
+        {
+          "id": "PATH03",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-PATH"
+          ],
+          "rationale": "Biến trung gian làm mất dấu nguồn ở regex."
+        },
+        {
+          "id": "SSRF01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-SSRF",
+            "SAST-AST-SSRF"
+          ],
+          "rationale": "URL do request chi phối."
+        },
+        {
+          "id": "SSRF02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Đích cố định trong lab."
+        },
+        {
+          "id": "SSRF03",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-SSRF"
+          ],
+          "rationale": "Đích qua biến trung gian bị bỏ sót."
+        },
+        {
+          "id": "XXE01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-XML"
+          ],
+          "rationale": "Corpus giả định parser nhận XML không tin cậy."
+        },
+        {
+          "id": "XXE02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Tùy chọn nguy hiểm được tắt."
+        },
+        {
+          "id": "XXE03",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Chú thích làm regex dương tính giả."
+        },
+        {
+          "id": "DES01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-DESER",
+            "SAST-AST-DESER"
+          ],
+          "rationale": "Dữ liệu không tin cậy được giải tuần tự hóa đối tượng."
+        },
+        {
+          "id": "DES02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Parser JSON không phục hồi đối tượng có phương thức; vẫn cần schema."
+        },
+        {
+          "id": "DES03",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-DESER"
+          ],
+          "rationale": "Alias hàm vượt regex."
+        },
+        {
+          "id": "EVAL01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-EVAL",
+            "SAST-AST-EVAL"
+          ],
+          "rationale": "Nguồn không tin cậy được thực thi."
+        },
+        {
+          "id": "EVAL02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Chuyển kiểu dữ liệu, không thực thi biểu thức."
+        },
+        {
+          "id": "BAC01",
+          "category": "IDOR_BAC",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-BAC"
+          ],
+          "rationale": "Corpus giả định không có middleware kiểm tra chủ sở hữu."
+        },
+        {
+          "id": "BAC02",
+          "category": "IDOR_BAC",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Truy vấn ràng buộc ID và chủ sở hữu trong ví dụ."
+        },
+        {
+          "id": "CSRF01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-CSRF"
+          ],
+          "rationale": "Corpus giả định GET thay đổi tên từ cookie mà không kiểm tra CSRF."
+        },
+        {
+          "id": "CSRF02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Corpus giả định csrfGuard hợp lệ."
+        },
+        {
+          "id": "TRUST01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-TRUST",
+            "SAST-AST-TRUST"
+          ],
+          "rationale": "Tin cậy HTML từ request."
+        },
+        {
+          "id": "TRUST02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Dùng hàm làm sạch theo ngữ cảnh trong ví dụ."
+        },
+        {
+          "id": "SAFE01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Tính tổng không có sink bảo mật trong phạm vi."
+        },
+        {
+          "id": "SAFE02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Thông báo cố định không chứa token."
+        },
+        {
+          "id": "EVAL03",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Dòng chú thích dùng làm đối chứng âm."
+        }
+      ]
+    },
+    "holdout": {
+      "dataset_name": "holdout.json",
+      "sample_count": 26,
+      "overall_metrics": {
+        "tp": 13,
+        "fp": 0,
+        "tn": 13,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "per_category_metrics": {
+        "XSS": {
+          "tp": 13,
+          "fp": 0,
+          "tn": 13,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0
+        },
+        "SQLI": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.0
+        },
+        "IDOR_BAC": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.0
+        },
+        "JWT": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.0
+        },
+        "MISC_CMD_DESER": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.0
+        }
+      },
+      "diagnostics": [
+        {
+          "id": "H-SQL-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-SQL",
+            "SAST-AST-SQL"
+          ],
+          "rationale": "Taint qua hai biến trung gian rồi ghép vào truy vấn."
+        },
+        {
+          "id": "H-SQL-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Truy vấn tham số hóa với placeholder $1."
+        },
+        {
+          "id": "H-XSS-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-DOM",
+            "SAST-AST-XSS"
+          ],
+          "rationale": "Nguồn từ header chảy vào HTML sink."
+        },
+        {
+          "id": "H-XSS-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Chuỗi tĩnh, không có nguồn không tin cậy."
+        },
+        {
+          "id": "H-XSS-C",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-DOM",
+            "SAST-AST-XSS"
+          ],
+          "rationale": "Nguồn URL chảy vào document.write."
+        },
+        {
+          "id": "H-CMD-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-EXEC",
+            "SAST-AST-CMD"
+          ],
+          "rationale": "Tham số request ghép vào lệnh shell."
+        },
+        {
+          "id": "H-CMD-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "execFile nhận mảng tham số, không qua shell."
+        },
+        {
+          "id": "H-PATH-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-PATH"
+          ],
+          "rationale": "Đường dẫn ghép từ tham số request."
+        },
+        {
+          "id": "H-PATH-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Đường dẫn dựng từ ID đã ánh xạ trong thư mục cố định."
+        },
+        {
+          "id": "H-SSRF-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-SSRF"
+          ],
+          "rationale": "Đích HTTP lấy từ body request."
+        },
+        {
+          "id": "H-SSRF-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Đích cố định."
+        },
+        {
+          "id": "H-DES-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-DESER",
+            "SAST-AST-DESER"
+          ],
+          "rationale": "Dữ liệu request giải tuần tự hóa qua biến trung gian."
+        },
+        {
+          "id": "H-DES-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "JSON không phục hồi đối tượng có phương thức."
+        },
+        {
+          "id": "H-JWT-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-JWT",
+            "SAST-AST-JWT"
+          ],
+          "rationale": "Cấp quyền dựa trên claim chưa xác minh."
+        },
+        {
+          "id": "H-JWT-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Chữ ký và thuật toán được xác minh trước khi dùng claim."
+        },
+        {
+          "id": "H-BAC-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-BAC"
+          ],
+          "rationale": "Truy vấn theo ID không ràng buộc chủ sở hữu."
+        },
+        {
+          "id": "H-BAC-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Ràng buộc chủ sở hữu trong truy vấn."
+        },
+        {
+          "id": "H-CSRF-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-CSRF"
+          ],
+          "rationale": "Thay đổi trạng thái (xóa) qua GET."
+        },
+        {
+          "id": "H-CSRF-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "POST kèm middleware CSRF."
+        },
+        {
+          "id": "H-TRUST-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-TRUST",
+            "SAST-AST-TRUST"
+          ],
+          "rationale": "Bỏ qua làm sạch của framework với dữ liệu request."
+        },
+        {
+          "id": "H-TRUST-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Làm sạch theo ngữ cảnh."
+        },
+        {
+          "id": "H-XXE-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-XML",
+            "SAST-AST-XXE"
+          ],
+          "rationale": "Bật thực thể ngoài khi parse XML từ request."
+        },
+        {
+          "id": "H-XXE-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Tắt thực thể ngoài và DTD."
+        },
+        {
+          "id": "H-EVAL-A",
+          "category": "XSS",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-EVAL",
+            "SAST-AST-EVAL"
+          ],
+          "rationale": "Biểu thức request thực thi qua eval."
+        },
+        {
+          "id": "H-SAFE-A",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Biến đổi dữ liệu, không có sink bảo mật."
+        },
+        {
+          "id": "H-SAFE-B",
+          "category": "XSS",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Tính toán nội bộ, không có nguồn không tin cậy."
+        }
+      ]
+    },
+    "external_corpus": {
+      "dataset_name": "external_corpus.json",
+      "sample_count": 40,
+      "overall_metrics": {
+        "tp": 11,
+        "fp": 3,
+        "tn": 17,
+        "fn": 9,
+        "precision": 0.7857,
+        "recall": 0.55,
+        "f1": 0.6471,
+        "accuracy": 0.7
+      },
+      "per_category_metrics": {
+        "XSS": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.0
+        },
+        "SQLI": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.0
+        },
+        "IDOR_BAC": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.0
+        },
+        "JWT": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.0
+        },
+        "MISC_CMD_DESER": {
+          "tp": 11,
+          "fp": 3,
+          "tn": 17,
+          "fn": 9,
+          "precision": 0.7857,
+          "recall": 0.55,
+          "f1": 0.6471,
+          "accuracy": 0.7
+        }
+      },
+      "diagnostics": [
+        {
+          "id": "EXT-JS-01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-SQL"
+          ],
+          "rationale": "Direct concatenation of untrusted req.body into SQL statement string."
+        },
+        {
+          "id": "EXT-JS-02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Parameterized query isolating parameters from the SQL AST."
+        },
+        {
+          "id": "EXT-JS-03",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Path traversal via unsanitized user-supplied filename in file write sink."
+        },
+        {
+          "id": "EXT-JS-04",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Path basename sanitization preventing directory traversal."
+        },
+        {
+          "id": "EXT-JS-05",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-XSS"
+          ],
+          "rationale": "Unsanitized query string written directly to DOM innerHTML sink."
+        },
+        {
+          "id": "EXT-JS-06",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Safe textContent DOM property prevents script injection."
+        },
+        {
+          "id": "EXT-JS-07",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Arbitrary code execution via dynamic template interpolation in Underscore."
+        },
+        {
+          "id": "EXT-JS-08",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Static template definition with user input passed solely as variable bindings."
+        },
+        {
+          "id": "EXT-JS-09",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Unrestricted deep merge allows prototype pollution via __proto__ keys."
+        },
+        {
+          "id": "EXT-JS-10",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Object.create(null) has no prototype chain to pollute."
+        },
+        {
+          "id": "EXT-JS-11",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Dynamic require() with untrusted path leads to arbitrary local file execution."
+        },
+        {
+          "id": "EXT-JS-12",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Allowlist guard prevents path traversal in require."
+        },
+        {
+          "id": "EXT-JS-13",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-SQL"
+          ],
+          "rationale": "Numeric parameter concatenated without validation into SQL query."
+        },
+        {
+          "id": "EXT-JS-14",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "PostgreSQL positional parameter placeholder."
+        },
+        {
+          "id": "EXT-JS-15",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-EVAL"
+          ],
+          "rationale": "Direct eval of untrusted client payload."
+        },
+        {
+          "id": "EXT-JS-16",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Safe JSON.parse does not execute arbitrary JavaScript functions."
+        },
+        {
+          "id": "EXT-JS-17",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Unchecked object property assignment allowing prototype manipulation."
+        },
+        {
+          "id": "EXT-JS-18",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Allowlist filtering of property keys before object assignment."
+        },
+        {
+          "id": "EXT-JS-19",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Open redirect: redirecting browser to arbitrary unvalidated user URL."
+        },
+        {
+          "id": "EXT-JS-20",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Relative URL validation prevents open redirect to external hosts."
+        },
+        {
+          "id": "EXT-PY-01",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-DESER"
+          ],
+          "rationale": "Insecure yaml.load without SafeLoader leads to arbitrary Python object instantiation."
+        },
+        {
+          "id": "EXT-PY-02",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "yaml.safe_load resolves only standard YAML primitives, forbidding arbitrary code."
+        },
+        {
+          "id": "EXT-PY-03",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Unvalidated redirect target from request.GET parameter."
+        },
+        {
+          "id": "EXT-PY-04",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Validation via url_has_allowed_host_and_scheme restricts target to safe hosts."
+        },
+        {
+          "id": "EXT-PY-05",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-PATH"
+          ],
+          "rationale": "Direct concatenation of user-provided filename into file open() path."
+        },
+        {
+          "id": "EXT-PY-06",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": true,
+          "result_type": "fp",
+          "matched_rules": [
+            "SAST-AST-PATH"
+          ],
+          "rationale": "secure_filename strips directory traversal sequences."
+        },
+        {
+          "id": "EXT-PY-07",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-SQL",
+            "SAST-AST-SQL"
+          ],
+          "rationale": "Python f-string interpolation directly inside SQL query string."
+        },
+        {
+          "id": "EXT-PY-08",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Parameterized DB-API placeholder (%s) separated from query string."
+        },
+        {
+          "id": "EXT-PY-09",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-XML",
+            "SAST-AST-XXE"
+          ],
+          "rationale": "XMLParser instantiated with resolve_entities=True enabling XXE expansion."
+        },
+        {
+          "id": "EXT-PY-10",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "defusedxml protects against entity expansion and external DTD retrieval."
+        },
+        {
+          "id": "EXT-PY-11",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Command injection through string concatenation into subprocess with shell=True."
+        },
+        {
+          "id": "EXT-PY-12",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Executable arguments passed as list with shell=False prevents command injection."
+        },
+        {
+          "id": "EXT-PY-13",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": false,
+          "result_type": "fn",
+          "matched_rules": [],
+          "rationale": "Server-side template injection (SSTI) via user-provided template string."
+        },
+        {
+          "id": "EXT-PY-14",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "Static filesystem template with user data bound as view variables."
+        },
+        {
+          "id": "EXT-PY-15",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-DESER",
+            "SAST-AST-DESER"
+          ],
+          "rationale": "Insecure deserialization of user-controlled cookie via pickle.loads."
+        },
+        {
+          "id": "EXT-PY-16",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": false,
+          "result_type": "tn",
+          "matched_rules": [],
+          "rationale": "JSON deserialization handles data only, prohibiting arbitrary code execution."
+        },
+        {
+          "id": "EXT-PY-17",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-AST-PATH"
+          ],
+          "rationale": "SSRF vulnerability: fetching arbitrary user-controlled URLs."
+        },
+        {
+          "id": "EXT-PY-18",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": true,
+          "result_type": "fp",
+          "matched_rules": [
+            "SAST-AST-PATH"
+          ],
+          "rationale": "Hostname allowlist validation mitigates SSRF."
+        },
+        {
+          "id": "EXT-PY-19",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": true,
+          "predicted_positive": true,
+          "result_type": "tp",
+          "matched_rules": [
+            "SAST-EVAL",
+            "SAST-AST-EVAL"
+          ],
+          "rationale": "Arbitrary Python code execution via eval on user form input."
+        },
+        {
+          "id": "EXT-PY-20",
+          "category": "MISC_CMD_DESER",
+          "actual_positive": false,
+          "predicted_positive": true,
+          "result_type": "fp",
+          "matched_rules": [
+            "SAST-AST-EVAL"
+          ],
+          "rationale": "ast.literal_eval parses only basic Python literals, safely rejecting function calls."
+        }
+      ]
+    }
+  },
+  "structural_failure_modes": [
+    {
+      "id": "FM-01-SHADOWING",
+      "name": "Lexical Shadowing & Variable Aliasing (False Positive)",
+      "mode": "Mode 1: Lexical Shadowing",
+      "description": "Inner block re-declares and sanitizes an identifier, but intra-file syntactic scan links sink to the tainted outer-scope identifier.",
+      "sample_code": "function handleRequest(req, res) {\n    const input = req.query.data;\n    if (isValid(input)) {\n        const input = sanitizeText(req.query.data);\n        res.send('<div>' + input + '</div>');\n    }\n}",
+      "expected": "BENIGN (False Positive if flagged without scope shadowing resolution)",
+      "root_cause": "The token-based JS scanner flattens lexical scope trees into a single symbol-assignment map, ignoring block-scoped variable shadowing (let/const shadowing in child AST scopes)."
+    },
+    {
+      "id": "FM-02-CONST-CONCAT",
+      "name": "Safe Constant Literal Concatenation (False Positive)",
+      "mode": "Mode 2: Safe Constant Concatenation",
+      "description": "Constructed query using purely compile-time constant string literals flagged by naive SQL concatenation rules.",
+      "sample_code": "const TABLE = 'products';\nconst DEFAULT_FILTER = 'WHERE active = 1';\nconst sql = 'SELECT * FROM ' + TABLE + ' ' + DEFAULT_FILTER;\ndb.query(sql);",
+      "expected": "BENIGN (False Positive if flagged without constant folding)",
+      "root_cause": "AST matcher flags binary operator (+) on SQL strings without evaluating whether all operand nodes resolve to immutable string literals (lack of abstract interpretation/constant propagation)."
+    },
+    {
+      "id": "FM-03-DYNAMIC-DISPATCH",
+      "name": "Dynamic Property Dispatch & Indirect Invocation (False Negative)",
+      "mode": "Mode 3: Dynamic Property Dispatch",
+      "description": "Taint flow channeled through dynamic object property lookup or callback table, evading direct function call pattern matching.",
+      "sample_code": "const sinks = { render: (data) => element.innerHTML = data };\nconst action = req.query.action || 'render';\nsinks[action](req.query.payload);",
+      "expected": "VULNERABLE (False Negative because sinks[action]() is an indirect computed call)",
+      "root_cause": "Intra-procedural AST matcher only inspects statically named MemberExpression and CallExpression nodes, failing to resolve computed properties or dynamic function dispatch."
+    },
+    {
+      "id": "FM-04-INTER-PROCEDURAL",
+      "name": "Inter-procedural & Cross-Module Discontinuity (False Negative)",
+      "mode": "Mode 4: Inter-procedural Taint Dissipation",
+      "description": "Source of taint is ingested in an Express controller, passed to a utility service class, and executed in an unparameterized database query in a separate file.",
+      "sample_code": "// controller.js\nconst UserService = require('./services/userService');\napp.get('/user', (req, res) => {\n    UserService.findUserRaw(req.query.id);\n});\n// services/userService.js\nclass UserService {\n    static findUserRaw(id) {\n        return db.query('SELECT * FROM users WHERE id = ' + id);\n    }\n}",
+      "expected": "VULNERABLE (False Negative if analyzed per-file independently)",
+      "root_cause": "JuiceSec analyzes files in total isolation (intra-file scope), lacking an inter-procedural Call Graph (CG) and cross-module Taint Flow Graph (TFG)."
+    }
+  ]
+}

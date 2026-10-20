@@ -1,0 +1,119 @@
+{
+  "timestamp": "2026-10-19T15:58:14Z",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.14",
+    "semgrep_version": "1.181.0",
+    "bandit_version": "1.9.4"
+  },
+  "architectural_profile": {
+    "JuiceSec": {
+      "runtime_dependencies": 0,
+      "language_coverage": [
+        "JavaScript",
+        "Python"
+      ],
+      "install_footprint": "< 100 KB (Pure standard library)",
+      "peak_memory_mb": "< 25 MB",
+      "execution_model": "In-memory AST taint + Regex union"
+    },
+    "Semgrep OSS": {
+      "runtime_dependencies": 25,
+      "language_coverage": [
+        "Multi-language (30+)"
+      ],
+      "install_footprint": "~200 MB (Python + native binary core)",
+      "peak_memory_mb": "~782 MB",
+      "execution_model": "Multi-pass Tree-sitter / Generic AST pattern matching"
+    },
+    "Bandit": {
+      "runtime_dependencies": 7,
+      "language_coverage": [
+        "Python only"
+      ],
+      "install_footprint": "~25 MB (Pip package + deps)",
+      "peak_memory_mb": "~40 MB",
+      "execution_model": "Python AST visitor blacklist & plugin checks"
+    }
+  },
+  "evaluations": {
+    "internal_synthetic": {
+      "sample_count": 66,
+      "juicesec": {
+        "count": 66,
+        "tp": 32,
+        "fp": 0,
+        "tn": 34,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "total_seconds": 0.0733,
+        "avg_ms_per_snippet": 1.11
+      },
+      "semgrep": {
+        "count": 66,
+        "tp": 3,
+        "fp": 1,
+        "tn": 33,
+        "fn": 29,
+        "precision": 0.75,
+        "recall": 0.0938,
+        "f1": 0.1667,
+        "total_seconds": 19.2888,
+        "avg_ms_per_snippet": 292.25
+      },
+      "bandit_python_subset": {
+        "count": 3,
+        "tp": 1,
+        "fp": 0,
+        "tn": 1,
+        "fn": 1,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667,
+        "total_seconds": 2.2693,
+        "scanned_files": 3
+      }
+    },
+    "external_cve_out_of_sample": {
+      "sample_count": 40,
+      "juicesec": {
+        "count": 40,
+        "tp": 9,
+        "fp": 3,
+        "tn": 17,
+        "fn": 11,
+        "precision": 0.75,
+        "recall": 0.45,
+        "f1": 0.5625,
+        "total_seconds": 0.0117,
+        "avg_ms_per_snippet": 0.29
+      },
+      "semgrep": {
+        "count": 40,
+        "tp": 10,
+        "fp": 2,
+        "tn": 18,
+        "fn": 10,
+        "precision": 0.8333,
+        "recall": 0.5,
+        "f1": 0.625,
+        "total_seconds": 7.2715,
+        "avg_ms_per_snippet": 181.79
+      },
+      "bandit_python_subset": {
+        "count": 20,
+        "tp": 7,
+        "fp": 3,
+        "tn": 7,
+        "fn": 3,
+        "precision": 0.7,
+        "recall": 0.7,
+        "f1": 0.7,
+        "total_seconds": 0.6245,
+        "scanned_files": 20
+      }
+    }
+  }
+}

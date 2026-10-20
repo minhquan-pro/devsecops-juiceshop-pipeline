@@ -1,0 +1,116 @@
+@layer components {
+  /* 1. Container Query Context */
+  .card-container {
+    container-type: inline-size;
+    container-name: card;
+    width: 100%;
+  }
+
+  /* 2. Card Layout (Default: Vertical Stack < 420px) */
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface-raised, #ffffff);
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle, #e5e7eb);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+    transition: transform var(--transition-fast, 0.2s ease), box-shadow var(--transition-fast, 0.2s ease);
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg, 0 8px 16px -4px rgba(0, 0, 0, 0.1));
+  }
+
+  .card-media {
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .card-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-md, 1rem);
+    gap: var(--space-xs, 0.5rem);
+    flex-grow: 1;
+  }
+
+  .card-title {
+    margin: 0;
+    font-size: var(--font-size-md, 1.125rem);
+    font-weight: var(--font-weight-semibold, 600);
+    line-height: var(--line-height-snug, 1.4);
+    color: var(--color-text-primary, #111827);
+  }
+
+  /* Stretched-link pattern: Clickable toàn bộ Card */
+  .card-title-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .card-title-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  /* Truncation 3 dòng */
+  .card-description {
+    margin: 0;
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-secondary, #4b5563);
+    line-height: var(--line-height-base, 1.5);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  /* Interactive actions độc lập: Nâng z-index để không bị link đè */
+  .card-actions,
+  .card-action-item {
+    position: relative;
+    z-index: 2;
+  }
+
+  .card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--space-sm, 0.75rem);
+  }
+
+  /* 3. Container Query: Horizontal Media Object (>= 420px) */
+  @container card (min-width: 420px) {
+    .card {
+      flex-direction: row;
+      align-items: stretch;
+    }
+
+    .card-media {
+      width: 38%;
+      max-width: 220px;
+    }
+
+    .card-image {
+      height: 100%;
+      aspect-ratio: auto;
+    }
+
+    .card-body {
+      padding: var(--space-lg, 1.25rem);
+    }
+  }
+}

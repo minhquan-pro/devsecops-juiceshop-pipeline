@@ -681,3 +681,505 @@ B.2.26 Mẫu Holdout #26: H-SAFE-B
 - Lý do gán nhãn: Tính toán nội bộ, không có nguồn không tin cậy.
 Đoạn mã Nguồn Kiểm chuẩn (Source Code):
     1 | await cache.set("key", computeChecksum(buffer));
+
+================================================================================
+B.3 TẬP OUT-OF-SAMPLE CVE ĐỐI CHỨNG NGOÀI (40 MẪU)
+
+B.3.1 Mẫu Ngoài #1: EXT-JS-01 [CVE-2017-5638-NODEGOAT-SQLI]
+- Mã định danh: EXT-JS-01 | CVE: CVE-2017-5638-NODEGOAT-SQLI
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-SQL
+- Lý do gán nhãn: Direct concatenation of untrusted req.body into SQL statement string.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const query = 'SELECT * FROM users WHERE login = "' + req.body.userName + '" AND pass = "' + req.body.password + '"';
+    2 | db.query(query, function(err, result) { res.render('profile', { user: result }); });
+
+B.3.2 Mẫu Ngoài #2: EXT-JS-02 [CVE-2017-5638-NODEGOAT-SQLI-FIX]
+- Mã định danh: EXT-JS-02 | CVE: CVE-2017-5638-NODEGOAT-SQLI-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Parameterized query isolating parameters from the SQL AST.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const query = 'SELECT * FROM users WHERE login = ? AND pass = ?';
+    2 | db.query(query, [req.body.userName, req.body.password], function(err, result) { res.render('profile', { user: result }); });
+
+B.3.3 Mẫu Ngoài #3: EXT-JS-03 [CVE-2020-7699-EXPRESS-FILEUPLOAD]
+- Mã định danh: EXT-JS-03 | CVE: CVE-2020-7699-EXPRESS-FILEUPLOAD
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Path traversal via unsanitized user-supplied filename in file write sink.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const file = req.files.upload;
+    2 | const savePath = '/var/www/uploads/' + req.body.filename;
+    3 | fs.writeFile(savePath, file.data, (err) => { res.send('Uploaded'); });
+
+B.3.4 Mẫu Ngoài #4: EXT-JS-04 [CVE-2020-7699-EXPRESS-FILEUPLOAD-FIX]
+- Mã định danh: EXT-JS-04 | CVE: CVE-2020-7699-EXPRESS-FILEUPLOAD-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Path basename sanitization preventing directory traversal.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const safeName = path.basename(req.body.filename);
+    2 | const savePath = path.join('/var/www/uploads', safeName);
+    3 | fs.writeFile(savePath, file.data, (err) => { res.send('Uploaded'); });
+
+B.3.5 Mẫu Ngoài #5: EXT-JS-05 [CVE-2018-3717-CONNECT-XSS]
+- Mã định danh: EXT-JS-05 | CVE: CVE-2018-3717-CONNECT-XSS
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-XSS
+- Lý do gán nhãn: Unsanitized query string written directly to DOM innerHTML sink.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | app.get('/search', (req, res) => {
+    2 |   document.getElementById('result').innerHTML = 'Search for: ' + req.query.q;
+    3 | });
+
+B.3.6 Mẫu Ngoài #6: EXT-JS-06 [CVE-2018-3717-CONNECT-XSS-FIX]
+- Mã định danh: EXT-JS-06 | CVE: CVE-2018-3717-CONNECT-XSS-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Safe textContent DOM property prevents script injection.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | app.get('/search', (req, res) => {
+    2 |   document.getElementById('result').textContent = 'Search for: ' + req.query.q;
+    3 | });
+
+B.3.7 Mẫu Ngoài #7: EXT-JS-07 [CVE-2021-23358-UNDERSCORE-TEMPLATE]
+- Mã định danh: EXT-JS-07 | CVE: CVE-2021-23358-UNDERSCORE-TEMPLATE
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Arbitrary code execution via dynamic template interpolation in Underscore.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const source = 'Hello ' + req.query.name;
+    2 | const compiled = _.template(source);
+    3 | res.send(compiled());
+
+B.3.8 Mẫu Ngoài #8: EXT-JS-08 [CVE-2021-23358-UNDERSCORE-TEMPLATE-FIX]
+- Mã định danh: EXT-JS-08 | CVE: CVE-2021-23358-UNDERSCORE-TEMPLATE-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Static template definition with user input passed solely as variable bindings.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const compiled = _.template('Hello <%= name %>');
+    2 | res.send(compiled({ name: req.query.name }));
+
+B.3.9 Mẫu Ngoài #9: EXT-JS-09 [CVE-2019-10744-LODASH-PROTOTYPE-POLLUTION]
+- Mã định danh: EXT-JS-09 | CVE: CVE-2019-10744-LODASH-PROTOTYPE-POLLUTION
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Unrestricted deep merge allows prototype pollution via __proto__ keys.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const payload = JSON.parse(req.body.config);
+    2 | _.merge({}, payload);
+
+B.3.10 Mẫu Ngoài #10: EXT-JS-10 [CVE-2019-10744-LODASH-FIX]
+- Mã định danh: EXT-JS-10 | CVE: CVE-2019-10744-LODASH-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Object.create(null) has no prototype chain to pollute.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const safeData = Object.create(null);
+    2 | Object.assign(safeData, JSON.parse(req.body.config));
+
+B.3.11 Mẫu Ngoài #11: EXT-JS-11 [CVE-2022-24785-MOMENT-PATH-TRAVERSAL]
+- Mã định danh: EXT-JS-11 | CVE: CVE-2022-24785-MOMENT-PATH-TRAVERSAL
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Dynamic require() with untrusted path leads to arbitrary local file execution.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const locale = req.query.lang;
+    2 | const localeData = require('./locale/' + locale);
+
+B.3.12 Mẫu Ngoài #12: EXT-JS-12 [CVE-2022-24785-MOMENT-FIX]
+- Mã định danh: EXT-JS-12 | CVE: CVE-2022-24785-MOMENT-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Allowlist guard prevents path traversal in require.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const allowed = ['en', 'vi', 'ja'];
+    2 | const lang = allowed.includes(req.query.lang) ? req.query.lang : 'en';
+    3 | const localeData = require('./locale/' + lang);
+
+B.3.13 Mẫu Ngoài #13: EXT-JS-13 [CVE-2017-16082-NODE-POSTGRES-SQLI]
+- Mã định danh: EXT-JS-13 | CVE: CVE-2017-16082-NODE-POSTGRES-SQLI
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-SQL
+- Lý do gán nhãn: Numeric parameter concatenated without validation into SQL query.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | client.query('SELECT * FROM accounts WHERE id = ' + req.params.id, (err, res) => {
+    2 |   console.log(res.rows);
+    3 | });
+
+B.3.14 Mẫu Ngoài #14: EXT-JS-14 [CVE-2017-16082-NODE-POSTGRES-FIX]
+- Mã định danh: EXT-JS-14 | CVE: CVE-2017-16082-NODE-POSTGRES-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: PostgreSQL positional parameter placeholder.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | client.query('SELECT * FROM accounts WHERE id = $1', [req.params.id], (err, res) => {
+    2 |   console.log(res.rows);
+    3 | });
+
+B.3.15 Mẫu Ngoài #15: EXT-JS-15 [CVE-2020-7612-SERIALIZE-JAVASCRIPT-RCE]
+- Mã định danh: EXT-JS-15 | CVE: CVE-2020-7612-SERIALIZE-JAVASCRIPT-RCE
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-EVAL
+- Lý do gán nhãn: Direct eval of untrusted client payload.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const untrusted = req.body.payload;
+    2 | eval('(' + untrusted + ')');
+
+B.3.16 Mẫu Ngoài #16: EXT-JS-16 [CVE-2020-7612-SERIALIZE-FIX]
+- Mã định danh: EXT-JS-16 | CVE: CVE-2020-7612-SERIALIZE-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Safe JSON.parse does not execute arbitrary JavaScript functions.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const safeData = JSON.parse(req.body.payload);
+
+B.3.17 Mẫu Ngoài #17: EXT-JS-17 [CVE-2018-3721-LODASH-MERGE]
+- Mã định danh: EXT-JS-17 | CVE: CVE-2018-3721-LODASH-MERGE
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Unchecked object property assignment allowing prototype manipulation.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const target = {};
+    2 | Object.assign(target, JSON.parse(req.query.prefs));
+
+B.3.18 Mẫu Ngoài #18: EXT-JS-18 [CVE-2018-3721-LODASH-FIX]
+- Mã định danh: EXT-JS-18 | CVE: CVE-2018-3721-LODASH-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Allowlist filtering of property keys before object assignment.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | const allowedKeys = ['theme', 'lang'];
+    2 | const prefs = {};
+    3 | const raw = JSON.parse(req.query.prefs);
+    4 | allowedKeys.forEach(k => { if (k in raw) prefs[k] = raw[k]; });
+
+B.3.19 Mẫu Ngoài #19: EXT-JS-19 [CVE-2022-25760-OPEN-REDIRECT]
+- Mã định danh: EXT-JS-19 | CVE: CVE-2022-25760-OPEN-REDIRECT
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Open redirect: redirecting browser to arbitrary unvalidated user URL.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | app.get('/login', (req, res) => {
+    2 |   res.redirect(req.query.next);
+    3 | });
+
+B.3.20 Mẫu Ngoài #20: EXT-JS-20 [CVE-2022-25760-OPEN-REDIRECT-FIX]
+- Mã định danh: EXT-JS-20 | CVE: CVE-2022-25760-OPEN-REDIRECT-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Relative URL validation prevents open redirect to external hosts.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | app.get('/login', (req, res) => {
+    2 |   const target = req.query.next && req.query.next.startsWith('/') ? req.query.next : '/dashboard';
+    3 |   res.redirect(target);
+    4 | });
+
+B.3.21 Mẫu Ngoài #21: EXT-PY-01 [CVE-2020-14343-PYYAML-ARBITRARY-CODE]
+- Mã định danh: EXT-PY-01 | CVE: CVE-2020-14343-PYYAML-ARBITRARY-CODE
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Insecure yaml.load without SafeLoader leads to arbitrary Python object instantiation.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import yaml
+    2 | def load_data(raw_input):
+    3 |     return yaml.load(raw_input)
+
+B.3.22 Mẫu Ngoài #22: EXT-PY-02 [CVE-2020-14343-PYYAML-FIX]
+- Mã định danh: EXT-PY-02 | CVE: CVE-2020-14343-PYYAML-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: yaml.safe_load resolves only standard YAML primitives, forbidding arbitrary code.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import yaml
+    2 | def load_data(raw_input):
+    3 |     return yaml.safe_load(raw_input)
+
+B.3.23 Mẫu Ngoài #23: EXT-PY-03 [CVE-2021-32052-DJANGO-URL-REDIRECT]
+- Mã định danh: EXT-PY-03 | CVE: CVE-2021-32052-DJANGO-URL-REDIRECT
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Unvalidated redirect target from request.GET parameter.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | from django.shortcuts import redirect
+    2 | def login_view(request):
+    3 |     next_url = request.GET.get('next')
+    4 |     return redirect(next_url)
+
+B.3.24 Mẫu Ngoài #24: EXT-PY-04 [CVE-2021-32052-DJANGO-URL-REDIRECT-FIX]
+- Mã định danh: EXT-PY-04 | CVE: CVE-2021-32052-DJANGO-URL-REDIRECT-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Validation via url_has_allowed_host_and_scheme restricts target to safe hosts.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | from django.shortcuts import redirect
+    2 | from django.utils.http import url_has_allowed_host_and_scheme
+    3 | def login_view(request):
+    4 |     next_url = request.GET.get('next')
+    5 |     if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+    6 |         next_url = '/home'
+    7 |     return redirect(next_url)
+
+B.3.25 Mẫu Ngoài #25: EXT-PY-05 [CVE-2022-42969-PYTEST-TEMPDIR-SYMLINK]
+- Mã định danh: EXT-PY-05 | CVE: CVE-2022-42969-PYTEST-TEMPDIR-SYMLINK
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-PATH
+- Lý do gán nhãn: Direct concatenation of user-provided filename into file open() path.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import os
+    2 | def handle_upload(request):
+    3 |     filename = request.form['name']
+    4 |     with open('/tmp/uploads/' + filename, 'wb') as f:
+    5 |         f.write(request.files['file'].read())
+
+B.3.26 Mẫu Ngoài #26: EXT-PY-06 [CVE-2022-42969-PYTEST-FIX]
+- Mã định danh: EXT-PY-06 | CVE: CVE-2022-42969-PYTEST-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Sai)
+- Ô ma trận nhầm lẫn: FP
+- Quy tắc khớp (rule_ids): SAST-AST-PATH
+- Lý do gán nhãn: secure_filename strips directory traversal sequences.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import os
+    2 | from werkzeug.utils import secure_filename
+    3 | def handle_upload(request):
+    4 |     filename = secure_filename(request.form['name'])
+    5 |     with open(os.path.join('/tmp/uploads', filename), 'wb') as f:
+    6 |         f.write(request.files['file'].read())
+
+B.3.27 Mẫu Ngoài #27: EXT-PY-07 [CVE-2019-19844-DJANGO-ACCOUNT-RESET]
+- Mã định danh: EXT-PY-07 | CVE: CVE-2019-19844-DJANGO-ACCOUNT-RESET
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Python f-string interpolation directly inside SQL query string.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | def query_user(cursor, email):
+    2 |     sql = f"SELECT id, email FROM auth_user WHERE email = '{email}'"
+    3 |     cursor.execute(sql)
+    4 |     return cursor.fetchall()
+
+B.3.28 Mẫu Ngoài #28: EXT-PY-08 [CVE-2019-19844-DJANGO-FIX]
+- Mã định danh: EXT-PY-08 | CVE: CVE-2019-19844-DJANGO-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Parameterized DB-API placeholder (%s) separated from query string.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | def query_user(cursor, email):
+    2 |     sql = "SELECT id, email FROM auth_user WHERE email = %s"
+    3 |     cursor.execute(sql, [email])
+    4 |     return cursor.fetchall()
+
+B.3.29 Mẫu Ngoài #29: EXT-PY-09 [CVE-2022-3376-PYGOAT-XXE]
+- Mã định danh: EXT-PY-09 | CVE: CVE-2022-3376-PYGOAT-XXE
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-XML, SAST-AST-XXE
+- Lý do gán nhãn: XMLParser instantiated with resolve_entities=True enabling XXE expansion.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | from lxml import etree
+    2 | def parse_xml(xml_payload):
+    3 |     parser = etree.XMLParser(resolve_entities=True)
+    4 |     return etree.fromstring(xml_payload, parser=parser)
+
+B.3.30 Mẫu Ngoài #30: EXT-PY-10 [CVE-2022-3376-PYGOAT-XXE-FIX]
+- Mã định danh: EXT-PY-10 | CVE: CVE-2022-3376-PYGOAT-XXE-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: defusedxml protects against entity expansion and external DTD retrieval.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | from defusedxml.lxml import fromstring
+    2 | def parse_xml(xml_payload):
+    3 |     return fromstring(xml_payload)
+
+B.3.31 Mẫu Ngoài #31: EXT-PY-11 [CVE-2021-29471-CHARDET-REGEX-DOS]
+- Mã định danh: EXT-PY-11 | CVE: CVE-2021-29471-CHARDET-REGEX-DOS
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Command injection through string concatenation into subprocess with shell=True.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import subprocess
+    2 | def ping_host(request):
+    3 |     target = request.args.get('target')
+    4 |     subprocess.call('ping -c 1 ' + target, shell=True)
+
+B.3.32 Mẫu Ngoài #32: EXT-PY-12 [CVE-2021-29471-CHARDET-FIX]
+- Mã định danh: EXT-PY-12 | CVE: CVE-2021-29471-CHARDET-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Executable arguments passed as list with shell=False prevents command injection.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import subprocess
+    2 | def ping_host(request):
+    3 |     target = request.args.get('target')
+    4 |     subprocess.run(['ping', '-c', '1', target], shell=False, check=True)
+
+B.3.33 Mẫu Ngoài #33: EXT-PY-13 [CVE-2020-28493-JINJA2-SSTI]
+- Mã định danh: EXT-PY-13 | CVE: CVE-2020-28493-JINJA2-SSTI
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Sai)
+- Ô ma trận nhầm lẫn: FN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Server-side template injection (SSTI) via user-provided template string.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | from flask import render_template_string
+    2 | def render_page(request):
+    3 |     user_tmpl = request.args.get('template')
+    4 |     return render_template_string(user_tmpl)
+
+B.3.34 Mẫu Ngoài #34: EXT-PY-14 [CVE-2020-28493-JINJA2-FIX]
+- Mã định danh: EXT-PY-14 | CVE: CVE-2020-28493-JINJA2-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: Static filesystem template with user data bound as view variables.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | from flask import render_template
+    2 | def render_page(request):
+    3 |     name = request.args.get('name')
+    4 |     return render_template('index.html', name=name)
+
+B.3.35 Mẫu Ngoài #35: EXT-PY-15 [CVE-2022-21797-SQLPARSE-DOS]
+- Mã định danh: EXT-PY-15 | CVE: CVE-2022-21797-SQLPARSE-DOS
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-DESER
+- Lý do gán nhãn: Insecure deserialization of user-controlled cookie via pickle.loads.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import pickle
+    2 | def handle_session(request):
+    3 |     session_blob = request.cookies.get('session')
+    4 |     return pickle.loads(bytes.fromhex(session_blob))
+
+B.3.36 Mẫu Ngoài #36: EXT-PY-16 [CVE-2022-21797-SQLPARSE-FIX]
+- Mã định danh: EXT-PY-16 | CVE: CVE-2022-21797-SQLPARSE-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Safe** (Đúng)
+- Ô ma trận nhầm lẫn: TN
+- Quy tắc khớp (rule_ids): Không có (An toàn)
+- Lý do gán nhãn: JSON deserialization handles data only, prohibiting arbitrary code execution.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import json
+    2 | def handle_session(request):
+    3 |     session_blob = request.cookies.get('session')
+    4 |     return json.loads(session_blob)
+
+B.3.37 Mẫu Ngoài #37: EXT-PY-17 [CVE-2021-33503-URLLIB3-REDOX]
+- Mã định danh: EXT-PY-17 | CVE: CVE-2021-33503-URLLIB3-REDOX
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-AST-PATH
+- Lý do gán nhãn: SSRF vulnerability: fetching arbitrary user-controlled URLs.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import urllib.request
+    2 | def proxy_view(request):
+    3 |     dest_url = request.args.get('url')
+    4 |     return urllib.request.urlopen(dest_url).read()
+
+B.3.38 Mẫu Ngoài #38: EXT-PY-18 [CVE-2021-33503-URLLIB3-FIX]
+- Mã định danh: EXT-PY-18 | CVE: CVE-2021-33503-URLLIB3-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Sai)
+- Ô ma trận nhầm lẫn: FP
+- Quy tắc khớp (rule_ids): SAST-AST-PATH
+- Lý do gán nhãn: Hostname allowlist validation mitigates SSRF.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import urllib.request
+    2 | from urllib.parse import urlparse
+    3 | ALLOWED_DOMAINS = {'api.internal.corp'}
+    4 | def proxy_view(request):
+    5 |     dest_url = request.args.get('url')
+    6 |     parsed = urlparse(dest_url)
+    7 |     if parsed.hostname not in ALLOWED_DOMAINS:
+    8 |         raise ValueError('Disallowed host')
+    9 |     return urllib.request.urlopen(dest_url).read()
+
+B.3.39 Mẫu Ngoài #39: EXT-PY-19 [CVE-2023-26136-TOUGH-COOKIE-PROTOTYPE]
+- Mã định danh: EXT-PY-19 | CVE: CVE-2023-26136-TOUGH-COOKIE-PROTOTYPE
+- Nhãn Thực tế (Ground Truth): **Vulnerable**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Đúng)
+- Ô ma trận nhầm lẫn: TP
+- Quy tắc khớp (rule_ids): SAST-EVAL, SAST-AST-EVAL
+- Lý do gán nhãn: Arbitrary Python code execution via eval on user form input.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | def execute_code(request):
+    2 |     code_string = request.form['code']
+    3 |     return eval(code_string)
+
+B.3.40 Mẫu Ngoài #40: EXT-PY-20 [CVE-2023-26136-TOUGH-COOKIE-FIX]
+- Mã định danh: EXT-PY-20 | CVE: CVE-2023-26136-TOUGH-COOKIE-FIX
+- Nhãn Thực tế (Ground Truth): **Safe**
+- Dự đoán của JuiceSec Analyzer: **Vulnerable** (Sai)
+- Ô ma trận nhầm lẫn: FP
+- Quy tắc khớp (rule_ids): SAST-AST-EVAL
+- Lý do gán nhãn: ast.literal_eval parses only basic Python literals, safely rejecting function calls.
+Đoạn mã Nguồn Kiểm chuẩn (Source Code):
+    1 | import ast
+    2 | def evaluate_math(request):
+    3 |     code_string = request.form['code']
+    4 |     return ast.literal_eval(code_string)

@@ -1,0 +1,222 @@
+/**
+ * evondevkit-modern - Modern Reset & Base Styles
+ * Specificity: Zero-specificity reset via :where()
+ * Positioning: 100% Logical Properties
+ * Accessibility: WCAG 2.2 AA Focus Indicators & Reduced Motion
+ */
+
+/* ==========================================================================
+   CSS Cascade Layer: Reset
+   ========================================================================== */
+@layer reset {
+  /* Box-sizing tự nhiên trên toàn bộ phần tử */
+  :where(*, *::before, *::after) {
+    box-sizing: border-box;
+    margin-block: 0;
+    margin-inline: 0;
+    padding-block: 0;
+    padding-inline: 0;
+  }
+
+  /* Reset document root */
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+  }
+
+  /* Smooth scrolling mặc định */
+  :where(html:focus-within) {
+    scroll-behavior: smooth;
+  }
+
+  /* Tắt animation/transition nếu người dùng kích hoạt reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    :where(html:focus-within) {
+      scroll-behavior: auto;
+    }
+
+    :where(*, *::before, *::after) {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Media elements tự co giãn an toàn */
+  :where(img, picture, video, canvas, svg) {
+    display: block;
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
+  /* Kế thừa typography cho form controls */
+  :where(input, button, textarea, select) {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    border: none;
+    background: transparent;
+  }
+
+  /* Bỏ style mặc định cho danh sách có class */
+  :where(ol, ul)[class] {
+    list-style: none;
+  }
+
+  /* Reset bảng */
+  :where(table) {
+    border-collapse: collapse;
+    border-spacing: 0;
+    inline-size: 100%;
+  }
+
+  /* Ngăn chặn text overflow & căn dòng tự nhiên */
+  :where(p, h1, h2, h3, h4, h5, h6, li, dt, dd) {
+    overflow-wrap: break-word;
+  }
+}
+
+/* ==========================================================================
+   CSS Cascade Layer: Base
+   ========================================================================== */
+@layer base {
+  /* Document Root & Body */
+  html {
+    block-size: 100%;
+  }
+
+  body {
+    min-block-size: 100%;
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-base);
+    color: var(--color-text-primary);
+    background-color: var(--color-surface-base);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Headings với text-wrap: balance */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--font-size-3xl);
+    margin-block-end: var(--space-md);
+  }
+
+  h2 {
+    font-size: var(--font-size-2xl);
+    margin-block-end: var(--space-sm);
+  }
+
+  h3 {
+    font-size: var(--font-size-xl);
+    margin-block-end: var(--space-sm);
+  }
+
+  h4 {
+    font-size: var(--font-size-lg);
+    margin-block-end: var(--space-xs);
+  }
+
+  h5 {
+    font-size: var(--font-size-md);
+    margin-block-end: var(--space-xs);
+  }
+
+  h6 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    margin-block-end: var(--space-2xs);
+  }
+
+  /* Paragraphs với text-wrap: pretty */
+  p {
+    text-wrap: pretty;
+    margin-block-end: var(--space-md);
+    max-inline-size: 70ch; /* Giới hạn độ dài dòng đọc tối ưu */
+  }
+
+  p:last-child {
+    margin-block-end: 0;
+  }
+
+  /* Links */
+  a {
+    color: var(--color-brand-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    text-decoration-thickness: 0.08em;
+    transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+  }
+
+  a:hover {
+    color: var(--color-brand-secondary);
+    text-decoration-thickness: 0.14em;
+  }
+
+  /* Inline Code & Preformatted Text */
+  code, kbd, samp, pre {
+    font-family: var(--font-family-mono);
+    font-size: 0.9em;
+  }
+
+  code:not(pre code) {
+    padding-block: var(--space-2xs);
+    padding-inline: var(--space-xs);
+    background-color: var(--color-surface-raised);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--color-border-subtle);
+  }
+
+  pre {
+    padding-block: var(--space-md);
+    padding-inline: var(--space-md);
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    margin-block-end: var(--space-md);
+  }
+
+  /* Small & Muted Text */
+  small {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+
+  /* Horizontal Rule */
+  hr {
+    border: none;
+    border-block-start: 1px solid var(--color-border-subtle);
+    margin-block: var(--space-xl);
+  }
+
+  /* --------------------------------------------------------------------------
+     Global Focus Indicator (WCAG 2.2 AA Standard)
+     Áp dụng Double-Ring Pattern chống xung đột màu nền (3:1 contrast ratio)
+     -------------------------------------------------------------------------- */
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--color-surface-base);
+  }
+
+  /* Custom Selection */
+  ::selection {
+    background-color: var(--color-brand-primary);
+    color: oklch(1 0 0);
+  }
+}

@@ -1,11 +1,42 @@
 {
-  "generated_at": "2026-10-17T18:25:56.470488+00:00",
+  "generated_at": "2026-10-20T13:09:15.550365+00:00",
   "python": "3.13.14",
   "platform": "Windows-11-10.0.26200-SP0",
-  "scope": "Synthetic fixtures only; Juice Shop not executed",
-  "engine": "line_regex + stdlib-AST taint union (see juicesec/astscan.py)",
+  "scope": "Internal synthetic regression floors (corpus, holdout) and external out-of-sample CVE validation. Real Juice Shop runs are tracked in evidence/juice-exploits.json.",
+  "engine": "line_regex + inter-procedural Python AST taint tracker + token/flow JS AST (see juicesec/astscan.py)",
+  "rule_integrity_hashes": {
+    "juicesec/core.py": "d7337b9e0e8b290080c4d92ff59a1a1a3ab090a89382cbd565a774c3a66ff5ff",
+    "juicesec/astscan.py": "673c01446081d1afb60fc1848650ab9023f53ed1d0c316522d570168fcfc205e"
+  },
+  "provenance": {
+    "datasets": {
+      "corpus": {
+        "file": "corpus.json",
+        "sha256": "a65ef81d5db66fdc4518a41172c24348603c4a056bebbf49591b2044301e07ff",
+        "count": 40,
+        "schema_valid": true,
+        "duplicate_ids": []
+      },
+      "holdout": {
+        "file": "holdout.json",
+        "sha256": "5620703d00448b1eab63d7a1b36965ec3ffd0898f435ef4ef8cba39e320d2bfe",
+        "count": 26,
+        "schema_valid": true,
+        "duplicate_ids": []
+      },
+      "external": {
+        "file": "external_corpus.json",
+        "sha256": "3b6dc20138da90ff1e78b7917c55f64bf9c53df84358d742f1167022cc0a8de9",
+        "count": 40,
+        "schema_valid": true,
+        "duplicate_ids": []
+      }
+    },
+    "id_overlap": [],
+    "note": "Holdout is an internal synthetic micro-benchmark curated for regression testing. External corpus consists of out-of-sample public CVE snippets evaluated under zero tuning."
+  },
   "unit_tests": {
-    "run": 52,
+    "run": 97,
     "failures": 0,
     "errors": 0,
     "successful": true
@@ -30,36 +61,46 @@
     "recall": 1.0,
     "f1": 1.0
   },
+  "external": {
+    "count": 40,
+    "tp": 11,
+    "fp": 3,
+    "tn": 17,
+    "fn": 9,
+    "precision": 0.7857142857142857,
+    "recall": 0.55,
+    "f1": 0.6470588235294117
+  },
   "benchmark": {
     "runs": 20,
     "warmups_excluded": 1,
     "requests_per_run": 5,
     "unit": "ms",
-    "median": 3.5807999993267003,
-    "minimum": 2.8661999967880547,
-    "maximum": 31.183999999484513,
-    "p95_nearest_rank": 26.312599999073427,
+    "median": 3.7752999996882863,
+    "minimum": 3.314499999760301,
+    "maximum": 27.111899998999434,
+    "p95_nearest_rank": 17.828799998824252,
     "raw": [
-      3.068699996219948,
-      3.6951000001863576,
-      2.9696000055992045,
-      3.7408999996841885,
-      4.364000000350643,
-      3.078599998843856,
-      26.312599999073427,
-      4.014100006315857,
-      3.978200002165977,
-      3.070400001888629,
-      3.263300000980962,
-      3.659500005596783,
-      3.049099999770988,
-      2.8661999967880547,
-      3.492899995762855,
-      3.5812999994959682,
-      3.274500006227754,
-      31.183999999484513,
-      15.89840000087861,
-      3.5802999991574325
+      17.828799998824252,
+      3.521099999488797,
+      4.907700000330806,
+      3.6700000000564614,
+      4.857099998844205,
+      3.5482999992382247,
+      3.5582999989856035,
+      27.111899998999434,
+      4.704599999968195,
+      3.5901999999623513,
+      3.731599999809987,
+      15.613699999448727,
+      3.4093000012944685,
+      4.929400000037276,
+      3.437899998971261,
+      16.224399998463923,
+      3.8189999995665858,
+      3.314499999760301,
+      4.840399999011424,
+      3.345800001625321
     ]
   }
 }

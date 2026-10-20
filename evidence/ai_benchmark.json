@@ -1,0 +1,175 @@
+{
+  "metadata": {
+    "algorithm": "Pipeline(FeatureUnion[TfidfVectorizer(1-2), SecurityFeatureExtractor] + CalibratedClassifierCV(VotingClassifier[LR, RF], cv=3))",
+    "validation_scheme": "StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)",
+    "train_samples": 80,
+    "holdout_samples": 26,
+    "train_vulnerable": 39,
+    "holdout_vulnerable": 13,
+    "cve_groups_count": 56,
+    "sha256_checksum": "7bca497eb8f8552fabc6382b9387beba5054195f91c7532cebd4733d6e4d818c"
+  },
+  "latency_benchmark": {
+    "mean_latency_ms": 0.566,
+    "total_samples_benchmarked": 130
+  },
+  "bootstrap_ci_95": {
+    "accuracy_ci_95": [
+      0.8846153846153846,
+      1.0
+    ],
+    "f1_ci_95": [
+      0.8664285714285714,
+      1.0
+    ],
+    "roc_auc_ci_95": [
+      0.9642857142857143,
+      1.0
+    ],
+    "brier_ci_95": [
+      0.05686498339597115,
+      0.12265859682037718
+    ]
+  },
+  "statistical_tests": {
+    "mcnemar": {
+      "contingency_table": {
+        "a_both_correct": 25,
+        "b_ast_correct_ai_wrong": 1,
+        "c_ast_wrong_ai_correct": 0,
+        "d_both_wrong": 0
+      },
+      "b": 1,
+      "c": 0,
+      "n_discordant": 1,
+      "p_value": 1.0,
+      "statistically_significant_0_05": false,
+      "statistically_significant_0_01": false,
+      "interpretation": "No statistically significant difference between AST and AI",
+      "test_type": "exact_binomial_two_sided"
+    }
+  },
+  "cross_validation_5_folds": {
+    "folds": {
+      "accuracy": [
+        0.7058823529411765,
+        0.8,
+        0.7058823529411765,
+        0.6875,
+        0.7333333333333333
+      ],
+      "precision": [
+        0.6363636363636364,
+        0.7,
+        0.6666666666666666,
+        0.8,
+        0.7142857142857143
+      ],
+      "recall": [
+        0.875,
+        1.0,
+        0.8888888888888888,
+        0.5,
+        0.7142857142857143
+      ],
+      "f1": [
+        0.7368421052631579,
+        0.8235294117647058,
+        0.7619047619047619,
+        0.6153846153846154,
+        0.7142857142857143
+      ],
+      "roc_auc": [
+        0.9444444444444444,
+        0.9821428571428571,
+        0.7916666666666667,
+        0.859375,
+        0.7678571428571429
+      ],
+      "brier_score": [
+        0.1573905691058093,
+        0.13240893413221003,
+        0.1817083914609507,
+        0.1584252599423806,
+        0.19960149248554618
+      ]
+    },
+    "summary": {
+      "accuracy": {
+        "mean": 0.7265196078431373,
+        "std": 0.03954773637666589
+      },
+      "precision": {
+        "mean": 0.7034632034632035,
+        "std": 0.05532596249408765
+      },
+      "recall": {
+        "mean": 0.7956349206349207,
+        "std": 0.17365362291302433
+      },
+      "f1": {
+        "mean": 0.730389321720591,
+        "std": 0.06811071341678296
+      },
+      "roc_auc": {
+        "mean": 0.8690972222222223,
+        "std": 0.08342192239410717
+      },
+      "brier_score": {
+        "mean": 0.16590692942537938,
+        "std": 0.02295922142531814
+      }
+    }
+  },
+  "holdout_evaluation": {
+    "accuracy": 0.9615384615384616,
+    "precision": 0.9285714285714286,
+    "recall": 1.0,
+    "f1": 0.9629629629629629,
+    "roc_auc": 0.9940828402366865,
+    "brier_score": 0.08857529556729833,
+    "classification_report": {
+      "0": {
+        "precision": 1.0,
+        "recall": 0.9230769230769231,
+        "f1-score": 0.96,
+        "support": 13.0
+      },
+      "1": {
+        "precision": 0.9285714285714286,
+        "recall": 1.0,
+        "f1-score": 0.9629629629629629,
+        "support": 13.0
+      },
+      "accuracy": 0.9615384615384616,
+      "macro avg": {
+        "precision": 0.9642857142857143,
+        "recall": 0.9615384615384616,
+        "f1-score": 0.9614814814814814,
+        "support": 26.0
+      },
+      "weighted avg": {
+        "precision": 0.9642857142857142,
+        "recall": 0.9615384615384616,
+        "f1-score": 0.9614814814814814,
+        "support": 26.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        12,
+        1
+      ],
+      [
+        0,
+        13
+      ]
+    ]
+  },
+  "confusion_matrix_holdout": {
+    "TN": 12,
+    "FP": 1,
+    "FN": 0,
+    "TP": 13
+  }
+}

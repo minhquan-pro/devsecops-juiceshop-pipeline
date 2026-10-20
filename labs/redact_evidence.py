@@ -17,20 +17,58 @@ from pathlib import Path
 
 # A JWT is three base64url segments joined by dots.
 JWT_RE = re.compile(r"eyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]*")
-# Sensitive JSON keys whose values are always masked.
+# Bearer tokens in headers or text.
+BEARER_RE = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/-]+=*")
+# Header lines for Authorization and Cookie.
+HEADER_RE = re.compile(r"(?im)^((?:authorization|proxy-authorization|cookie|set-cookie):\s*).+$")
+# Sensitive URL query parameters.
+QUERY_PARAM_RE = re.compile(
+    r"(?i)([?&](?:access_token|refresh_token|api_key|apikey|token|secret|password|client_secret)=)[^&\s\"'<>]+"
+)
+
+# Case-insensitive sensitive key pattern for JSON structures.
+SENSITIVE_KEY_RE = re.compile(
+    r"^(?:access[-_]?token|refresh[-_]?token|id[-_]?token|api[-_]?key|client[-_]?secret"
+    r"|authorization|proxy[-_]?authorization|cookie|set[-_]?cookie|bearer|token"
+    r"|password|passwd|pwd|secret|apikey)$",
+    re.IGNORECASE,
+)
 SENSITIVE_KEYS = {"token", "password", "authorization", "cookie", "secret", "apikey"}
 
 
+def is_sensitive_key(key: str) -> bool:
+    """Return True if dictionary key matches sensitive credential naming."""
+    if not isinstance(key, str):
+        return False
+    norm = re.sub(r"[_\-]", "", key).lower()
+    return bool(SENSITIVE_KEY_RE.match(key)) or norm in {
+        "token", "accesstoken", "refreshtoken", "idtoken", "apikey",
+        "clientsecret", "authorization", "proxyauthorization",
+        "cookie", "setcookie", "bearer", "password", "secret",
+    }
+
+
 def redact_text(text: str) -> str:
+    """Redact tokens, JWTs, headers, and query parameters from text content."""
     text = JWT_RE.sub("<jwt-redacted>", text)
     # JWT still base64 inside the middle segment of a preview: mask after 'eyJ'.
-    return re.sub(r"eyJ[A-Za-z0-9_-]+", "<jwt-redacted>", text)
+    text = re.sub(r"eyJ[A-Za-z0-9_-]+", "<jwt-redacted>", text)
+    # Mask Bearer authentication tokens
+    text = BEARER_RE.sub("Bearer <redacted>", text)
+    # Mask HTTP header lines
+    text = HEADER_RE.sub(r"\1<redacted>", text)
+    # Mask sensitive URL query parameters
+    text = QUERY_PARAM_RE.sub(r"\g<1><redacted>", text)
+    return text
 
 
 def redact_value(value):
+    """Recursively mask sensitive values in structured data without mutating inputs."""
     if isinstance(value, dict):
-        return {k: ("<redacted>" if k.lower() in SENSITIVE_KEYS else redact_value(v))
-                for k, v in value.items()}
+        return {
+            k: ("<redacted>" if is_sensitive_key(k) else redact_value(v))
+            for k, v in value.items()
+        }
     if isinstance(value, list):
         return [redact_value(v) for v in value]
     if isinstance(value, str):

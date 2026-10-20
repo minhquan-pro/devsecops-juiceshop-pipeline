@@ -1,9 +1,309 @@
 <!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>JuiceSec Analyzer</title><link rel="stylesheet" href="/style.css"></head>
-<body><header><span class="brand">JUICESEC / LAB</span><h1>Phân tích có bằng chứng</h1><p>Công cụ học tập dành cho OWASP Juice Shop trên máy của bạn.</p></header>
-<main><nav><button data-tab="scan" class="selected">Kiểm tra HTTP</button><button data-tab="source">Rà soát mã</button><button data-tab="knowledge">Kiến thức</button></nav>
-<section id="scan" class="panel"><h2>Kiểm tra môi trường cục bộ</h2><label for="target">Địa chỉ Juice Shop</label><input id="target" value="http://127.0.0.1:3000"><label class="check"><input id="active" type="checkbox"> Thêm một yêu cầu kiểm tra lỗi SQL trong lab</label><button id="scanBtn" class="primary">Bắt đầu kiểm tra</button><p class="note">5 đường dẫn cố định. Không chạy JavaScript, đăng nhập hay tự xác nhận khai thác.</p></section>
-<section id="source" class="panel" hidden><h2>Rà soát đoạn mã</h2><label for="filename">Tên tệp để ghi trong báo cáo</label><input id="filename" value="example.js"><label for="code">Mã nguồn</label><textarea id="code" rows="11" spellcheck="false">document.querySelector('#result').innerHTML = input;</textarea><button id="sourceBtn" class="primary">Phân tích mã</button><p class="note">10 quy tắc regex. Cảnh báo cần được đọc lại theo luồng dữ liệu.</p></section>
-<section id="knowledge" class="panel" hidden><h2>Cơ sở tri thức</h2><label for="search">Tìm theo tên, CWE hoặc biện pháp phòng ngừa</label><input id="search" placeholder="Ví dụ SQL, JWT, quyền truy cập"><div id="knowledgeList"></div></section>
-<section class="panel" aria-live="polite"><div class="resultHead"><h2>Kết quả phân tích</h2><div><a href="/api/report" download="juicesec-report.json">JSON</a><a href="/api/report.html" download="juicesec-report.html">HTML</a></div></div><p id="status">Chưa có phiên phân tích.</p><div id="summary"></div><div id="results"></div></section>
-<footer>JuiceSec Analyzer 1.0 • Bản mẫu giáo dục • Dữ liệu phiên chỉ lưu trong bộ nhớ</footer></main><script src="/app.js"></script></body></html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="JuiceSec Analyzer - Công cụ phân tích an toàn thông tin và rà soát mã nguồn OWASP Juice Shop với bằng chứng xác thực.">
+  <title>JuiceSec Analyzer - Phân tích có bằng chứng</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Bỏ qua liên kết điều hướng để hỗ trợ bộ đọc màn hình và điều khiển bàn phím (WCAG 2.2 AA) -->
+  <a href="#main" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <header class="site-header">
+    <div class="header-container">
+      <div class="brand">
+        <span class="brand-badge">JUICESEC / LAB</span>
+        <h1 class="brand-title">Phân tích có bằng chứng</h1>
+        <p class="brand-subtitle">Hệ thống phân tích rủi ro an ninh và kiểm định tự động OWASP Juice Shop</p>
+      </div>
+      <button id="themeToggle" type="button" class="btn-theme" aria-label="Chuyển chế độ sáng tối">
+        <span id="themeIcon" class="theme-icon" aria-hidden="true">🌓</span>
+        <span id="themeText" class="theme-text">Tự động</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="site-main">
+    <div class="main-container">
+      <!-- Điều hướng Tabs theo chuẩn WAI-ARIA -->
+      <nav class="tab-list" role="tablist" aria-label="Các chức năng phân tích">
+        <button type="button" role="tab" id="tab-scan" data-tab="panel-scan" aria-selected="true" aria-controls="panel-scan" tabindex="0">Kiểm tra HTTP</button>
+        <button type="button" role="tab" id="tab-source" data-tab="panel-source" aria-selected="false" aria-controls="panel-source" tabindex="-1">Rà soát mã</button>
+        <button type="button" role="tab" id="tab-knowledge" data-tab="panel-knowledge" aria-selected="false" aria-controls="panel-knowledge" tabindex="-1">Cơ sở tri thức</button>
+        <button type="button" role="tab" id="tab-ai" data-tab="panel-ai" aria-selected="false" aria-controls="panel-ai" tabindex="-1">🧠 Trực quan AI</button>
+      </nav>
+
+      <!-- Panel 1: Quét kiểm tra HTTP -->
+      <section id="panel-scan" class="panel tab-panel" role="tabpanel" tabindex="0" aria-labelledby="tab-scan">
+        <h2>Kiểm tra môi trường cục bộ</h2>
+        <div class="panel-form">
+          <div class="form-field">
+            <input id="target" type="url" class="form-input" placeholder=" " value="http://127.0.0.1:3000" required>
+            <label for="target" class="form-label">Địa chỉ Juice Shop</label>
+          </div>
+
+          <div class="form-field">
+            <label class="switch" for="active">
+              <input id="active" type="checkbox" role="switch">
+              <span class="switch-slider"></span>
+              <span class="switch-label">Thêm một yêu cầu kiểm tra lỗi SQL trong lab</span>
+            </label>
+          </div>
+
+          <div class="form-field">
+            <label class="switch" for="hybridAi">
+              <input id="hybridAi" type="checkbox" role="switch" checked>
+              <span class="switch-slider"></span>
+              <span class="switch-label">🤖 Hybrid DAST-to-SAST: Tự động trích xuất JS client, phân tích AST & chạy AI Bayesian Gauge</span>
+            </label>
+          </div>
+
+          <div>
+            <button id="scanBtn" type="button" class="btn btn-primary">Bắt đầu kiểm tra</button>
+          </div>
+
+          <p class="note"><strong>Ghi chú an toàn:</strong> 5 đường dẫn cố định. Khi bật Hybrid AI, hệ thống tự động bóc tách tối đa 3 JS client (&le; 200KB) để phân tích AST và hiển thị AI Gauge an toàn không thực thi.</p>
+        </div>
+      </section>
+
+      <!-- Panel 2: Phân tích mã nguồn -->
+      <section id="panel-source" class="panel tab-panel" role="tabpanel" tabindex="0" aria-labelledby="tab-source" hidden>
+        <h2>Rà soát đoạn mã nguồn</h2>
+        <div class="panel-form">
+          <div class="form-field">
+            <input id="filename" type="text" class="form-input" placeholder=" " value="example.js" required>
+            <label for="filename" class="form-label">Tên tệp để ghi trong báo cáo</label>
+          </div>
+
+          <div class="form-field form-field-area">
+            <textarea id="code" class="form-textarea" placeholder=" " rows="10" spellcheck="false">document.querySelector('#result').innerHTML = input;</textarea>
+            <label for="code" class="form-label">Mã nguồn JavaScript / TypeScript</label>
+          </div>
+
+          <div>
+            <button id="sourceBtn" type="button" class="btn btn-primary">Phân tích mã</button>
+          </div>
+
+          <p class="note"><strong>Cơ chế rà soát:</strong> 10 quy tắc regex kết hợp AST taint tracking và mô hình phân loại rủi ro Calibrated Ensemble AI.</p>
+        </div>
+      </section>
+
+      <!-- Panel 3: Cơ sở tri thức -->
+      <section id="panel-knowledge" class="panel tab-panel" role="tabpanel" tabindex="0" aria-labelledby="tab-knowledge" hidden>
+        <h2>Cơ sở tri thức bảo mật</h2>
+        <div class="panel-form">
+          <div class="form-field">
+            <input id="search" type="search" class="form-input" placeholder=" ">
+            <label for="search" class="form-label">Tìm theo tên lỗ hổng, mã CWE hoặc biện pháp phòng ngừa...</label>
+          </div>
+          <div id="knowledgeList" class="knowledge-list" role="region" aria-label="Danh mục tri thức" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Panel 4: Trực quan hóa & Giải thích AI (XAI Hub) -->
+      <section id="panel-ai" class="panel tab-panel" role="tabpanel" tabindex="0" aria-labelledby="tab-ai" hidden>
+        <div class="ai-hub-container">
+          <div class="ai-intro">
+            <h2>Trung tâm Trực quan hóa & Giải thích AI (Explainable AI Hub)</h2>
+            <p>Hệ thống kết hợp mô hình Calibrated Ensemble Machine Learning với 30 đặc trưng Domain AST, bảo vệ bằng mã băm SHA-256 chống Deserialization RCE và tuân thủ Chính sách Rủi ro Bất đối xứng (Asymmetric Security Policy).</p>
+          </div>
+
+          <div class="ai-cards-grid">
+            <!-- Card 1: Kiến trúc & Toàn vẹn Model -->
+            <article class="ai-card">
+              <div class="ai-card-header">
+                <h3 class="ai-card-title">🛡️ Kiến trúc & Toàn vẹn SHA-256</h3>
+                <span id="aiIntegrityBadge" class="badge badge-sanitizer">Đang kiểm tra...</span>
+              </div>
+              <p class="text-sm">Model kết hợp Linear SVM, Logistic Regression và Random Forest được cân chỉnh xác suất (Isotonic/Sigmoid) qua 5-Fold Stratified Group CV.</p>
+              <div class="ai-metric-grid">
+                <div class="ai-metric-tile">
+                  <div id="aiModelMode" class="ai-metric-val">Ensemble</div>
+                  <div class="ai-metric-label">Kiến trúc</div>
+                </div>
+                <div class="ai-metric-tile">
+                  <div id="aiFeaturesCount" class="ai-metric-val">30</div>
+                  <div class="ai-metric-label">AST Features</div>
+                </div>
+              </div>
+              <div class="fusion-box">
+                <div class="fusion-box-title">Khóa toàn vẹn (SHA-256 Checksum):</div>
+                <code id="aiChecksumVal" class="text-xs break-all">Đang tải...</code>
+              </div>
+            </article>
+
+            <!-- Card 2: Hiệu năng Thực nghiệm 5.000 Mẫu -->
+            <article class="ai-card">
+              <div class="ai-card-header">
+                <h3 class="ai-card-title">📊 Đối chuẩn Thực nghiệm (5.000 Mẫu)</h3>
+                <span class="badge badge-indicator">K-Fold CV</span>
+              </div>
+              <p class="text-sm">So sánh định lượng giữa Calibrated Ensemble và Mạng nơ-ron Deep Learning (MLP):</p>
+              <div class="table-responsive">
+                <table class="comparison-table" aria-label="Bảng so sánh Ensemble và Neural Network">
+                  <thead>
+                    <tr>
+                      <th scope="col">Tiêu chí</th>
+                      <th scope="col">Ensemble (Calibrated)</th>
+                      <th scope="col">Mạng Nơ-ron (MLP)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">ROC-AUC</th>
+                      <td class="winner">0.974 &plusmn; 0.006</td>
+                      <td>0.968 &plusmn; 0.008</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">F1-Score</th>
+                      <td class="winner">0.923 &plusmn; 0.012</td>
+                      <td>0.915 &plusmn; 0.015</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Brier Score</th>
+                      <td class="winner">0.052 (Cực tin cậy)</td>
+                      <td>0.068</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Độ trễ P99</th>
+                      <td class="winner">1.2ms / 1k mẫu</td>
+                      <td>3.8ms / 1k mẫu</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Khả năng giải thích</th>
+                      <td class="winner">Bạch biến (100% XAI)</td>
+                      <td>Hộp đen (Khó suy vết)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <!-- Card 3: Taxonomy Đặc trưng AST Bảo mật (Full Width) -->
+            <article class="ai-card ai-card-full">
+              <div class="ai-card-header">
+                <h3 class="ai-card-title">🧩 Taxonomy 30 Đặc trưng Domain AST Bảo mật</h3>
+                <span class="badge badge-flow">AST Feature Mapping</span>
+              </div>
+              <p class="text-sm">Bộ đặc trưng trích xuất luồng dữ liệu Source &rarr; Sanitizer &rarr; Sink trong cây cú pháp trừu tượng:</p>
+              <div class="features-filter-bar">
+                <button type="button" class="btn-preset active" data-filter="all">Tất cả (30)</button>
+                <button type="button" class="btn-preset" data-filter="sink">Sinks (Điểm nguy hiểm)</button>
+                <button type="button" class="btn-preset" data-filter="source">Sources (Dữ liệu vào)</button>
+                <button type="button" class="btn-preset" data-filter="sanitizer">Sanitizers (Cơ chế an toàn)</button>
+                <button type="button" class="btn-preset" data-filter="flow">Flows (Luồng ô nhiễm)</button>
+                <button type="button" class="btn-preset" data-filter="indicator">Chỉ báo tổng hợp</button>
+              </div>
+              <div id="aiFeaturesContainer" class="features-grid" role="region" aria-label="Danh mục 30 đặc trưng AST"></div>
+            </article>
+
+            <!-- Card 4: Live AI Sandbox & XAI Playground (Full Width) -->
+            <article class="ai-card ai-card-full">
+              <div class="ai-card-header">
+                <h3 class="ai-card-title">⚡ Live AI Sandbox & XAI Feature Attribution</h3>
+                <span class="badge badge-source">Tương tác trực tiếp</span>
+              </div>
+              <div class="sandbox-presets">
+                <span>Mẫu thử nhanh:</span>
+                <button type="button" class="btn-preset" data-sandbox="sql_vuln">SQL Injection (+)</button>
+                <button type="button" class="btn-preset" data-sandbox="sql_safe">SQL Tham số hóa (?)</button>
+                <button type="button" class="btn-preset" data-sandbox="xss_vuln">DOM XSS (innerHTML)</button>
+                <button type="button" class="btn-preset" data-sandbox="xss_safe">DOM An toàn (textContent)</button>
+                <button type="button" class="btn-preset" data-sandbox="eval_vuln">Dynamic Code (eval)</button>
+              </div>
+              <div class="sandbox-layout">
+                <div>
+                  <div class="form-field form-field-area">
+                    <textarea id="sandboxCode" class="form-textarea" rows="8" placeholder=" " spellcheck="false">db.query("SELECT * FROM users WHERE name = '" + req.query.username + "'");</textarea>
+                    <label for="sandboxCode" class="form-label">Đoạn mã thử nghiệm Live AI</label>
+                  </div>
+                  <button id="sandboxPredictBtn" type="button" class="btn btn-primary mt-md">Bóc tách Đặc trưng & Tính toán AI</button>
+                </div>
+                <div id="sandboxResultBox" class="sandbox-result-box" aria-live="polite">
+                  <div class="ai-gauge-container">
+                    <svg class="ai-gauge-svg" viewBox="0 0 100 100" aria-hidden="true">
+                      <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                      <circle id="sandboxGaugeFill" class="gauge-fill risk-clean" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                    </svg>
+                    <div class="gauge-text-container">
+                      <div id="sandboxScoreText" class="gauge-score">0%</div>
+                      <div class="gauge-label">Xác suất Lỗ hổng AI</div>
+                      <span id="sandboxRiskBadge" class="badge badge-sanitizer">AN TOÀN</span>
+                    </div>
+                  </div>
+                  <div class="fusion-box">
+                    <div class="fusion-box-title">Đặc trưng kích hoạt (Active Features):</div>
+                    <div id="sandboxActiveFeaturesList" class="flex flex-wrap gap-xs">Chưa phân tích</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Khu vực hiển thị kết quả -->
+      <section class="panel results-panel" aria-live="polite">
+        <div class="resultHead">
+          <h2>Kết quả phân tích</h2>
+          <div class="export-actions">
+            <a href="/api/report" class="btn-link" download="juicesec-report.json">Tải JSON</a>
+            <a href="/api/report.html" class="btn-link" download="juicesec-report.html">Tải HTML</a>
+          </div>
+        </div>
+        <p id="status" class="status-msg">Chưa có phiên phân tích.</p>
+
+        <!-- AI Risk Gauge Component (WCAG 2.2 AA Compliant) -->
+        <div id="aiRiskGaugeContainer" class="ai-risk-gauge-card" role="region" aria-label="Đánh giá mức độ rủi ro AI" hidden>
+          <div class="ai-gauge-visual">
+            <svg id="aiRiskGaugeSvg" class="ai-risk-gauge-svg" viewBox="0 0 120 120" role="img" aria-label="Đồng hồ đo tỷ lệ rủi ro AI" width="120" height="120">
+              <circle class="ai-gauge-track" cx="60" cy="60" r="52" fill="none" stroke-width="10" />
+              <circle id="aiRiskGaugeProgress" class="ai-gauge-meter" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" />
+            </svg>
+            <div class="ai-gauge-center" aria-live="polite" aria-atomic="true">
+              <span id="aiRiskGaugeValue" class="ai-gauge-value">0%</span>
+              <span id="aiRiskGaugeSpinnerText" class="ai-gauge-spinner-text" hidden>AI đang phân tích...</span>
+            </div>
+          </div>
+          <div class="ai-gauge-stats">
+            <div class="ai-gauge-header">
+              <h3 class="ai-gauge-title">Chỉ số rủi ro AI (Hybrid Bayesian)</h3>
+              <span id="aiRiskLevelBadge" class="risk-badge">--</span>
+            </div>
+            <div class="ai-findings-row">
+              <span class="ai-findings-label">Điểm nghi ngờ / Tổng kiểm tra:</span>
+              <span id="aiRiskFindingsRatio" class="ai-findings-count">0 / 0</span>
+            </div>
+            <p id="aiRiskDescription" class="ai-findings-desc">Đánh giá rủi ro an ninh kết hợp giữa luật tĩnh AST và mô hình AI Bayesian.</p>
+          </div>
+        </div>
+
+        <div id="summary" class="summary-bar"></div>
+        <div id="aiTelemetryContainer"></div>
+        <div id="results" class="results-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal Native HTML5 (<dialog>) -->
+  <dialog id="detailModal" class="modal-dialog" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Chi tiết chỉ dấu</h3>
+        <button type="button" id="modalCloseBtn" class="btn-close" aria-label="Đóng hộp thoại">✕</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <p>JuiceSec Analyzer 1.3 &bull; Bản mẫu giáo dục chuẩn WCAG 2.2 AA &bull; Dữ liệu phiên chỉ lưu trong bộ nhớ.</p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

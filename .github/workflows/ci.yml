@@ -22,11 +22,18 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validate zero runtime external dependencies
+        run: |
+          python -c "deps = [line.strip() for line in open('requirements.txt') if line.strip() and not line.startswith('#')]; assert len(deps) == 0, f'Unexpected runtime dependencies: {deps}'"
+
       - name: Reproduce unit tests
         run: python -m unittest discover -s tests -v
 
       - name: Regenerate evidence (tests, corpus, benchmark)
         run: python evaluate.py
+
+      - name: Generate failure analysis and error metrics
+        run: python labs/gen_error_analysis.py
 
       - name: Enforce quality thresholds against delivered baseline
         # Baseline 1.0: F1 0.5946, precision 0.6111, recall 0.5789.
@@ -41,7 +48,17 @@ jobs:
             --min-precision 0.85 \
             --min-recall 0.85 \
             --min-holdout-f1 0.85 \
-            --max-p95-ms 500
+            --min-external-f1 0.55 \
+            --min-external-recall 0.50 \
+            --max-p95-ms 500 \
+            --require-ai-gate \
+            --min-ai-f1 0.80 \
+            --min-ai-auc 0.85 \
+            --max-ai-latency-ms 20
+
+      - name: Compute artifact integrity checksums (SHA-256)
+        run: |
+          cd evidence && sha256sum * > checksums.sha256 && head -n 20 checksums.sha256
 
       - name: Upload evidence artifacts
         if: always()

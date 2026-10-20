@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="auto">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="evondevKit-Modern Showcase - Design System hiện đại với OKLCH, Container Queries, Cascade Layers và chuẩn WCAG 2.2 AA">
+  <title>evondevKit-Modern — Interactive Showcase</title>
+
+  <!-- Modular Stylesheets via CSS Cascade Layers -->
+  <link rel="stylesheet" href="tokens/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="components/navigation/nav.css">
+  <link rel="stylesheet" href="components/form/form.css">
+  <link rel="stylesheet" href="components/card/card.css">
+  <link rel="stylesheet" href="components/modal/modal.css">
+
+  <style>
+    /* Demo Layout Composition Styles */
+    @layer composition {
+      .l-container {
+        inline-size: min(100% - 2rem, 1200px);
+        margin-inline: auto;
+      }
+      .l-flow > * + * {
+        margin-block-start: var(--flow-space, var(--space-md));
+      }
+      .l-grid-cq-demo {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--space-lg);
+        align-items: start;
+      }
+      .l-form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--space-md);
+      }
+    }
+
+    @layer components {
+      /* Skip link */
+      .skip-link {
+        position: absolute;
+        inset-block-start: var(--space-sm);
+        inset-inline-start: var(--space-sm);
+        padding-block: var(--space-xs);
+        padding-inline: var(--space-md);
+        background: var(--color-brand-primary);
+        color: #ffffff;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        font-weight: 600;
+        z-index: 9999;
+        transform: translateY(-200%);
+        transition: transform var(--transition-fast);
+      }
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      /* Theme Switcher Segmented Control */
+      .c-theme-toggle {
+        display: inline-flex;
+        background-color: var(--color-surface-raised);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-full);
+        padding: 3px;
+        gap: 2px;
+      }
+      .c-theme-btn {
+        background: transparent;
+        border: 0;
+        padding-block: var(--space-xs);
+        padding-inline: var(--space-sm);
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2xs);
+        min-block-size: 36px;
+        color: var(--color-text-secondary);
+        transition: all var(--transition-fast);
+      }
+      .c-theme-btn[aria-checked="true"] {
+        background-color: var(--color-surface-overlay);
+        color: var(--color-brand-primary);
+        box-shadow: var(--shadow-sm);
+      }
+
+      /* Section & Demo Boxes */
+      .c-section {
+        padding-block: var(--space-xl);
+        border-block-end: 1px solid var(--color-border-subtle);
+      }
+      .c-demo-box {
+        background: var(--color-surface-base);
+        border: 1px dashed var(--color-border-strong);
+        border-radius: var(--radius-lg);
+        padding: var(--space-md);
+      }
+      .c-demo-box__label {
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-brand-primary);
+        margin-block-end: var(--space-sm);
+        display: block;
+      }
+
+      /* Container Query explicit demo wrappers */
+      .cq-wrapper--w280 { max-inline-size: 280px; }
+      .cq-wrapper--w380 { max-inline-size: 380px; }
+      .cq-wrapper--w500 { max-inline-size: 500px; }
+      .cq-wrapper--fluid { inline-size: 100%; }
+
+      /* Action Buttons */
+      .c-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-xs);
+        padding-block: var(--space-xs);
+        padding-inline: var(--space-lg);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        min-block-size: 44px; /* WCAG 2.2 AA Target Size */
+        min-inline-size: 44px;
+        transition: background var(--transition-fast), transform var(--transition-fast);
+      }
+      .c-btn--primary {
+        background-color: var(--color-brand-primary);
+        color: #ffffff;
+      }
+      .c-btn--primary:hover {
+        background-color: var(--color-brand-secondary);
+      }
+      .c-btn--secondary {
+        background-color: var(--color-surface-raised);
+        border: 1px solid var(--color-border-strong);
+        color: var(--color-text-primary);
+      }
+      .c-btn--secondary:hover {
+        background-color: var(--color-surface-overlay);
+      }
+
+      .badge {
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        padding-block: var(--space-2xs);
+        padding-inline: var(--space-xs);
+        border-radius: var(--radius-xs);
+        background-color: var(--color-surface-raised);
+        color: var(--color-brand-primary);
+        border: 1px solid var(--color-border-subtle);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Bàn phím điều hướng WCAG Skip Link -->
+  <a href="#main-content" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <!-- Header Navigation -->
+  <header class="edk-header">
+    <div class="edk-header__container">
+      <a href="#" class="edk-header__logo" aria-label="evondevKit Trang chủ">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-inline-end: 8px; color: var(--color-brand-primary);" aria-hidden="true">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
+        <span>evondevKit</span>
+      </a>
+
+      <!-- Theme Switcher Segmented Control -->
+      <fieldset class="c-theme-toggle" role="radiogroup" aria-label="Lựa chọn giao diện hiển thị">
+        <legend class="u-sr-only" style="display:none">Chế độ giao diện</legend>
+        <button type="button" class="c-theme-btn" data-set-theme="light" role="radio" aria-checked="false" aria-label="Giao diện Sáng">
+          Sáng
+        </button>
+        <button type="button" class="c-theme-btn" data-set-theme="dark" role="radio" aria-checked="false" aria-label="Giao diện Tối">
+          Tối
+        </button>
+        <button type="button" class="c-theme-btn" data-set-theme="auto" role="radio" aria-checked="true" aria-label="Giao diện Tự động">
+          Tự động
+        </button>
+      </fieldset>
+
+      <!-- Hamburger Button (Mobile) -->
+      <button class="edk-nav-toggle" type="button" aria-label="Mở menu điều hướng">
+        <span class="edk-nav-toggle__icon" aria-hidden="true"></span>
+      </button>
+
+      <!-- Backdrop Overlay -->
+      <div class="edk-nav-backdrop" aria-hidden="true"></div>
+
+      <!-- Navigation Drawer -->
+      <nav class="edk-nav-drawer" aria-label="Menu chính">
+        <ul class="edk-nav-list">
+          <li class="edk-nav-item"><a href="#cq-section" class="edk-nav-link" aria-current="page">Container Query</a></li>
+          <li class="edk-nav-item"><a href="#form-section" class="edk-nav-link">Form Controls</a></li>
+          <li class="edk-nav-item"><a href="#modal-section" class="edk-nav-link">Dialog Modal</a></li>
+          <li class="edk-nav-item"><a href="#tokens-section" class="edk-nav-link">OKLCH Tokens</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-content" class="l-container l-flow" style="--flow-space: var(--space-xl);">
+    
+    <!-- Hero Section -->
+    <section class="c-section l-flow">
+      <h1 style="color: var(--color-brand-primary);">evondevKit-Modern Design System</h1>
+      <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary);">
+        Thư viện UI chuẩn quốc tế ứng dụng <strong>CSS Cascade Layers</strong>, <strong>OKLCH Color Tokens</strong>, 
+        <strong>Fluid Typography</strong>, <strong>CSS Container Queries</strong> và đạt chuẩn tiếp cận <strong>WCAG 2.2 AA</strong>.
+      </p>
+    </section>
+
+    <!-- SECTION 1: Container Queries Responsive Showcase -->
+    <section id="cq-section" class="c-section l-flow" aria-labelledby="cq-showcase-title">
+      <div class="l-flow" style="--flow-space: var(--space-xs);">
+        <h2 id="cq-showcase-title">1. Container Queries Component Showcase</h2>
+        <p>4 thẻ dưới đây được đặt trong các khung chứa cha có chiều rộng khác nhau. Thẻ tự động biến đổi giao diện từ dạng dọc (Vertical Stack) sang dạng ngang (Horizontal Media Object) tại điểm gãy <code>@container card (min-width: 420px)</code> mà <strong>không phụ thuộc vào kích thước màn hình</strong>:</p>
+      </div>
+
+      <div class="l-grid-cq-demo">
+        <!-- Container 1: 280px -->
+        <div class="c-demo-box cq-wrapper--w280">
+          <span class="c-demo-box__label">Parent Width: 280px (Vertical Stack)</span>
+          <div class="card-container">
+            <article class="card">
+              <div class="card-media">
+                <img class="card-image" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60" alt="Minh họa kiến trúc kỹ thuật số" loading="lazy">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a href="#article1" class="card-title-link">Cấu Trúc Cột Nhỏ</a>
+                </h3>
+                <p class="card-description">Mô tả bài viết dài sẽ được tự động rút gọn chính xác ở 3 dòng bằng CSS line-clamp hiện đại mà không vỡ bố cục.</p>
+                <div class="card-actions">
+                  <span class="card-action-item badge">CSS CQ</span>
+                  <button type="button" class="card-action-item c-btn c-btn--secondary" style="min-block-size: 36px; padding: 0 12px; font-size: 13px;">♥ 14</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Container 2: 380px -->
+        <div class="c-demo-box cq-wrapper--w380">
+          <span class="c-demo-box__label">Parent Width: 380px (Vertical Stack)</span>
+          <div class="card-container">
+            <article class="card">
+              <div class="card-media">
+                <img class="card-image" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60" alt="Minh họa kiến trúc kỹ thuật số" loading="lazy">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a href="#article2" class="card-title-link">Thẻ Tiêu Chuẩn</a>
+                </h3>
+                <p class="card-description">Không gian thẻ lớn hơn nhưng vẫn giữ cấu trúc dọc tối ưu hóa mật độ hiển thị ảnh trước bài đọc.</p>
+                <div class="card-actions">
+                  <span class="card-action-item badge">OKLCH</span>
+                  <button type="button" class="card-action-item c-btn c-btn--secondary" style="min-block-size: 36px; padding: 0 12px; font-size: 13px;">♥ 28</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Container 3: 500px -->
+        <div class="c-demo-box cq-wrapper--w500" style="grid-column: 1 / -1;">
+          <span class="c-demo-box__label">Parent Width: 500px (Chuyển đổi Ngang Horizontal Media Object >= 420px)</span>
+          <div class="card-container">
+            <article class="card">
+              <div class="card-media">
+                <img class="card-image" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60" alt="Minh họa kiến trúc kỹ thuật số" loading="lazy">
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a href="#article3" class="card-title-link">Chuyển Dạng Hàng Ngang Đột Phá</a>
+                </h3>
+                <p class="card-description">Khi container đạt từ 420px trở lên, container query tự động chuyển bố cục sang hàng ngang (ảnh trái, thông tin phải) với stretched-link bấm toàn thẻ.</p>
+                <div class="card-actions">
+                  <span class="card-action-item badge">Horizontal Media</span>
+                  <button type="button" class="card-action-item c-btn c-btn--secondary" style="min-block-size: 36px; padding: 0 12px; font-size: 13px;">♥ 102</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Form Controls, Floating Label & Switches -->
+    <section id="form-section" class="c-section l-flow" aria-labelledby="form-showcase-title">
+      <h2 id="form-showcase-title">2. Modern Form Controls & Accessible Toggle Switch</h2>
+      <p>Sử dụng CSS Floating Label Pattern thuần túy với <code>:placeholder-shown</code>, <code>:focus-within</code> và <code>:user-invalid</code>:</p>
+
+      <form id="demo-form" class="l-flow" novalidate style="max-inline-size: 680px;">
+        <div class="l-form-grid">
+          <!-- Input Họ tên -->
+          <div class="form-field">
+            <div class="form-floating">
+              <input type="text" id="fullname" name="fullname" class="form-floating__input" placeholder=" " required minlength="3">
+              <label for="fullname" class="form-floating__label">Họ và tên *</label>
+            </div>
+            <span class="form-message form-message--helper">Tối thiểu 3 ký tự chữ cái</span>
+            <span class="form-message form-message--error" id="fullname-error">Vui lòng nhập họ tên hợp lệ.</span>
+          </div>
+
+          <!-- Input Email -->
+          <div class="form-field">
+            <div class="form-floating">
+              <input type="email" id="email" name="email" class="form-floating__input" placeholder=" " required>
+              <label for="email" class="form-floating__label">Địa chỉ Email *</label>
+            </div>
+            <span class="form-message form-message--helper">Ví dụ: dev@evondev.com</span>
+            <span class="form-message form-message--error" id="email-error">Địa chỉ email không đúng định dạng.</span>
+          </div>
+        </div>
+
+        <!-- Accessible Custom Toggle Switch -->
+        <label class="form-switch" for="notifications">
+          <input type="checkbox" id="notifications" class="form-switch__input" role="switch" aria-checked="false">
+          <span class="form-switch__track" aria-hidden="true">
+            <span class="form-switch__thumb"></span>
+          </span>
+          <span class="form-switch__label">Nhận thông báo cập nhật linh kiện và bài viết mới</span>
+        </label>
+
+        <div style="display: flex; gap: var(--space-md); align-items: center; margin-block-start: var(--space-sm);">
+          <button type="submit" class="c-btn c-btn--primary">Xác Nhận Đăng Ký</button>
+          <span id="form-status" role="status" aria-live="polite" style="font-size: var(--font-size-sm); font-weight: 500;"></span>
+        </div>
+      </form>
+    </section>
+
+    <!-- SECTION 3: Native <dialog> Modal -->
+    <section id="modal-section" class="c-section l-flow" aria-labelledby="modal-section-title">
+      <h2 id="modal-section-title">3. Native HTML5 Dialog Modal</h2>
+      <p>Component sử dụng thẻ <code><dialog></code> chuẩn của trình duyệt kết hợp <code>::backdrop</code> blur, hiệu ứng entry/exit mượt mà với <code>@starting-style</code>, tự động khôi phục focus:</p>
+
+      <div>
+        <button type="button" class="c-btn c-btn--secondary" id="openModalBtn">
+          Mở Native Dialog Modal
+        </button>
+      </div>
+
+      <!-- Native Dialog Modal -->
+      <dialog id="demoModal" class="evon-modal" aria-labelledby="modalTitle">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-block-end: var(--space-md);">
+          <h3 id="modalTitle" style="margin: 0;">Thông Báo Hệ Thống</h3>
+          <button type="button" id="closeModalBtn" aria-label="Đóng hộp thoại" style="cursor: pointer; background: transparent; border: none; font-size: 1.5rem; line-height: 1; padding: 4px 8px;">&times;</button>
+        </div>
+        <p style="margin-block-end: var(--space-md);">
+          Hộp thoại này sử dụng API chuẩn <code>showModal()</code>. Bạn có thể bấm <kbd>ESC</kbd> hoặc nhấp chuột vào vùng mờ (backdrop) phía ngoài để đóng. Tiêu điểm bàn phím sẽ tự động trả về nút kích hoạt.
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-sm);">
+          <button type="button" class="c-btn c-btn--secondary" id="cancelModalBtn">Hủy</button>
+          <button type="button" class="c-btn c-btn--primary" id="confirmModalBtn">Đồng ý</button>
+        </div>
+      </dialog>
+    </section>
+
+    <!-- SECTION 4: Tokens & Design System Summary -->
+    <section id="tokens-section" class="c-section l-flow">
+      <h2>4. Bảng Tra Cứu Token OKLCH & WCAG 2.2 AA</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+        <div style="padding: var(--space-md); border-radius: var(--radius-md); background-color: var(--color-brand-primary); color: #ffffff;">
+          <strong>Brand Primary</strong><br>
+          <code>oklch(0.55 0.22 264)</code>
+        </div>
+        <div style="padding: var(--space-md); border-radius: var(--radius-md); background-color: var(--color-brand-secondary); color: #ffffff;">
+          <strong>Brand Secondary</strong><br>
+          <code>oklch(0.62 0.16 168)</code>
+        </div>
+        <div style="padding: var(--space-md); border-radius: var(--radius-md); background-color: var(--color-status-success); color: #ffffff;">
+          <strong>Status Success</strong><br>
+          <code>oklch(0.56 0.19 142)</code>
+        </div>
+        <div style="padding: var(--space-md); border-radius: var(--radius-md); background-color: var(--color-status-danger); color: #ffffff;">
+          <strong>Status Danger</strong><br>
+          <code>oklch(0.54 0.22 28)</code>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="c-section l-container" role="contentinfo" style="border: none; text-align: center; color: var(--color-text-muted);">
+    <p>&copy; 2026 evondevKit-Modern. Thiết kế & hiện đại hóa bởi Senior UI/UX Engineer theo chuẩn WCAG 2.2 AA.</p>
+  </footer>
+
+  <!-- SCRIPT BOOTSTRAP -->
+  <script type="module">
+    import { ResponsiveNav } from './components/navigation/nav.js';
+    import { FormValidator, AccessibleSwitch } from './components/form/form.js';
+    import { AccessibleModal } from './components/modal/modal.js';
+
+    // 1. Khởi tạo Navigation
+    new ResponsiveNav();
+
+    // 2. Khởi tạo Form Validation & Switches
+    const formEl = document.getElementById('demo-form');
+    const formStatus = document.getElementById('form-status');
+    new FormValidator(formEl, {
+      onValidSubmit: (form) => {
+        formStatus.textContent = '✓ Gửi biểu mẫu thành công!';
+        formStatus.style.color = 'var(--color-status-success)';
+        form.reset();
+        const sw = form.querySelector('.form-switch__input');
+        if (sw) sw.setAttribute('aria-checked', 'false');
+      }
+    });
+    AccessibleSwitch.initAll();
+
+    // 3. Khởi tạo Native Modal
+    const modalEl = document.getElementById('demoModal');
+    const openBtn = document.getElementById('openModalBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelModalBtn');
+    const confirmBtn = document.getElementById('confirmModalBtn');
+
+    const modal = new AccessibleModal(modalEl, {
+      onClose: () => {
+        console.log('Dialog đã đóng thành công.');
+      }
+    });
+
+    openBtn.addEventListener('click', () => modal.open(openBtn));
+    closeBtn.addEventListener('click', () => modal.close());
+    cancelBtn.addEventListener('click', () => modal.close());
+    confirmBtn.addEventListener('click', () => modal.close());
+
+    // 4. Khởi tạo Theme Switcher
+    const htmlRoot = document.documentElement;
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    const STORAGE_KEY = 'evon-theme-preference';
+
+    function applyTheme(theme) {
+      htmlRoot.setAttribute('data-theme', theme);
+      localStorage.setItem(STORAGE_KEY, theme);
+      themeButtons.forEach(btn => {
+        btn.setAttribute('aria-checked', btn.dataset.setTheme === theme ? 'true' : 'false');
+      });
+    }
+
+    const savedTheme = localStorage.getItem(STORAGE_KEY) || 'auto';
+    applyTheme(savedTheme);
+
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => applyTheme(btn.dataset.setTheme));
+    });
+  </script>
+</body>
+</html>

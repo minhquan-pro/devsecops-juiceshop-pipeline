@@ -2,23 +2,52 @@
 
 ## Dùng ứng dụng
 
-Mở thư mục `JuiceSec-Analyzer`, đọc `README.md`. Python 3.10 trở lên, không cần thư viện Python ngoài.
+Chạy trực tiếp từ thư mục gốc của repository (`2026-10-24devsecops-juiceshop-pipeline`). Yêu cầu Python 3.10 trở lên, không cần thư viện ngoài (Zero External Runtime Dependencies).
 
 ```bash
-cd JuiceSec-Analyzer
+# 1. Chạy toàn bộ kiểm thử, đánh giá corpus, holdout và đo lường benchmark
 python evaluate.py
+
+# 2. Kiểm tra cổng chất lượng CI (Quality Gate)
+python scan_gate.py --require-tests-pass --min-f1 0.85 --min-precision 0.85 --min-recall 0.85 --min-holdout-f1 0.85 --min-external-f1 0.50 --max-p95-ms 500
+
+# 3. Khởi động Web UI phân tích (mở http://127.0.0.1:5000)
 python app.py
 ```
 
-Trên Windows có thể dùng `py -3` thay `python`. Mở http://127.0.0.1:5000.
+Trên Windows có thể dùng `py -3` thay `python`. Mở http://127.0.0.1:5000 trong trình duyệt.
 
-`evidence` chứa kết quả thật trên dữ liệu mô phỏng. Không phải kết quả khai thác Juice Shop. Các kịch bản Juice Shop trong báo cáo cần chạy trên lab của người thực hiện để bổ sung bằng chứng.
+Thư mục `evidence/` chứa toàn bộ chứng cứ kiểm thử thực nghiệm:
+- 63 bài Unit Test tự động (100% passed).
+- Dữ liệu vi chuẩn tổng hợp nội bộ (synthetic micro-benchmarks): Corpus (40 snippets, F1=1.0000) và Holdout (26 snippets, F1=1.0000) dùng làm chốt chặn kiểm thử hồi quy (regression floor).
+- Dữ liệu ngoài mẫu out-of-sample: External Corpus (40 snippets trích xuất từ CVE thực tế theo giao thức Zero-Tuning, đạt F1=0.5625; đối sánh với Semgrep đạt F1=0.6250 và Bandit đạt F1=0.7000 nhưng JuiceSec đạt tốc độ siêu tốc ~11.7ms so với Semgrep 7.27s và tiêu tốn ~705MB RAM).
+- Phân tích sai số và 4 Failure Modes cấu trúc (`evidence/error_analysis.json`).
+- Bằng chứng đối chuẩn baseline ba chiều (`evidence/appendix_c_benchmark.txt`).
 
-## Nguồn tạo báo cáo
+Các kịch bản khai thác Juice Shop thật (`labs/juice_shop_exploits.py`) chạy trực tiếp trên Juice Shop cục bộ để bổ sung bằng chứng thực nghiệm độc lập:
 
-Thư mục `authoring` có dữ liệu và mã tạo báo cáo Word. Đây là công cụ biên soạn riêng, không phải dependency của ứng dụng. Cần Python cùng python-docx, Pillow và matplotlib. Môi trường tạo bản bàn giao là Linux, có font DejaVu Sans và font thay thế Times New Roman. Khi dùng font hoặc bộ chuyển PDF khác, phân trang có thể thay đổi.
+```bash
+# Chạy khai thác trên Juice Shop thật (port 3000) và khử nhạy cảm
+python labs/juice_shop_exploits.py --target http://127.0.0.1:3000
+python labs/redact_evidence.py evidence/
 
-Giữ hai thư mục `JuiceSec-Analyzer` và `authoring` cùng cấp. Chạy từ thư mục gốc đã giải nén:
+# Sinh phân tích ma trận nhầm lẫn và 4 failure modes
+python labs/gen_error_analysis.py
+
+# Đo chuẩn baseline đối sánh với Semgrep / Bandit
+python labs/benchmark_baseline.py
+```
+
+Tài liệu học thuật kèm theo:
+- [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md): Mô hình an toàn STRIDE, ranh giới tin cậy (Trust Boundaries) và kiểm thử an toàn.
+- [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md): 5 giới hạn cấu trúc học thuật theo định lý Rice.
+- [`docs/ERROR_ANALYSIS.md`](docs/ERROR_ANALYSIS.md): Phân tích sai số per-rule và 4 failure modes (shadowing, constant concat, dynamic dispatch, inter-procedural).
+
+## Nguồn tạo báo cáo (Tùy chọn)
+
+Thư mục `authoring/` (nếu có trong gói tài liệu biên soạn đầy đủ) chứa dữ liệu và mã tạo báo cáo Word bằng `python-docx`. Đây là công cụ biên soạn riêng biệt, không phải dependency của ứng dụng. Cần Python cùng python-docx, Pillow và matplotlib. Môi trường tạo bản bàn giao là Linux, có font DejaVu Sans và font thay thế Times New Roman. Khi dùng font hoặc bộ chuyển PDF khác, phân trang có thể thay đổi.
+
+Khi có thư mục `authoring/` ở thư mục gốc:
 
 ```bash
 python authoring/assemble.py

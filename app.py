@@ -10,6 +10,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from juicesec.core import scan, analyze_source, html_report
+from juicesec.ai_classifier import VulnerabilityAIClassifier, FEATURE_METADATA
 
 ROOT = Path(__file__).resolve().parent
 CSRF_TOKEN = secrets.token_urlsafe(32)
@@ -55,6 +56,38 @@ class Handler(BaseHTTPRequestHandler):
             return self.json_data(200, {"csrf": CSRF_TOKEN})
         if path == "/api/knowledge":
             return self.send_data(200, (ROOT/"data"/"knowledge.json").read_bytes())
+        if path == "/api/ai":
+            clf = VulnerabilityAIClassifier()
+            checksum_path = ROOT / "models" / "model_checksum.sha256"
+            model_path = ROOT / "models" / "vuln_classifier.joblib"
+            sha256_hash = checksum_path.read_text(encoding="utf-8").strip() if checksum_path.exists() else ""
+            integrity_valid = clf.verify_model_integrity(model_path) if model_path.exists() else False
+
+            bench_5k_path = ROOT / "evidence" / "synthetic_5k_benchmark.json"
+            bench_5k = json.loads(bench_5k_path.read_text(encoding="utf-8")) if bench_5k_path.exists() else {}
+
+            bench_prod_path = ROOT / "evidence" / "ai_benchmark.json"
+            bench_prod = json.loads(bench_prod_path.read_text(encoding="utf-8")) if bench_prod_path.exists() else {}
+
+            ai_info = {
+                "model_mode": clf.mode,
+                "model_name": clf.model_name,
+                "model_path": str(model_path.relative_to(ROOT)) if model_path.exists() else None,
+                "sha256_checksum": sha256_hash,
+                "integrity_valid": integrity_valid,
+                "anti_tampering": "Enforced (SHA-256 Checksum Guard against Deserialization RCE)",
+                "features_count": len(FEATURE_METADATA),
+                "features": FEATURE_METADATA,
+                "benchmark_production": bench_prod.get("holdout_evaluation", {}),
+                "benchmark_production_cv": bench_prod.get("cross_validation_5_folds", {}).get("summary", {}),
+                "benchmark_5k": bench_5k,
+                "asymmetric_security_policy": {
+                    "critical_high_downgrade": "STRICTLY FORBIDDEN (Never downgrade deterministic AST Critical/High)",
+                    "low_info_escalation": "Permitted if AI confidence >= 0.85",
+                    "score_fusion": "Bayesian Logit Odds: sigmoid(0.7*logit(rule) + 0.3*logit(global_ai))"
+                }
+            }
+            return self.json_data(200, ai_info)
         if path in ("/api/report", "/api/report.html"):
             with REPORT_LOCK:
                 saved = dict(REPORT)
@@ -90,14 +123,84 @@ class Handler(BaseHTTPRequestHandler):
                 try:
                     if type(data.get("active", False)) is not bool:
                         raise ValueError("active must be boolean")
-                    report = scan(data.get("target", ""), data.get("active", False))
+                    if type(data.get("openapi_fuzz", False)) is not bool:
+                        raise ValueError("openapi_fuzz must be boolean")
+                    if type(data.get("ai_hybrid", True)) is not bool:
+                        raise ValueError("ai_hybrid must be boolean")
+                    ai_hybrid = data.get("ai_hybrid", True)
+                    report = scan(
+                        data.get("target", ""),
+                        data.get("active", False),
+                        data.get("openapi_fuzz", False),
+                        analyze_client=ai_hybrid
+                    )
+                    client_code = report.pop("client_source_sample", "")
+                    if ai_hybrid:
+                        clf = VulnerabilityAIClassifier()
+                        raw_findings = report.get("findings", [])
+                        rescored_findings = clf.rescore_ast_findings(raw_findings, client_code)
+                        report["findings"] = rescored_findings
+                        eval_snippet = client_code if client_code.strip() else "/* DAST Network Assessment: No client-side scripts extracted */"
+                        ai_telemetry = clf.get_detailed_explanation(eval_snippet)
+                        report["ai_telemetry"] = ai_telemetry
+
+                        findings_count = len(rescored_findings)
+                        records_count = len(report.get("records", []))
+                        errors_count = len(report.get("errors", []))
+                        total_checks = records_count + errors_count
+                        if total_checks == 0:
+                            total_checks = max(findings_count, 1)
+
+                        bayesian_conf = ai_telemetry.get("bayesian_confidence")
+                        if bayesian_conf is not None:
+                            risk_percent = int(round(float(bayesian_conf) * 100))
+                        else:
+                            risk_percent = int(round((findings_count / total_checks) * 100))
+                        risk_percent = max(0, min(100, risk_percent))
+
+                        report["ai_gauge"] = {
+                            "risk_percent": risk_percent,
+                            "findings": findings_count,
+                            "total": total_checks
+                        }
                 finally:
                     SCAN_LOCK.release()
             elif path == "/api/source":
-                report = {"schema_version": "1.1", "mode": "sast_regex_ast_union", "target": "submitted source",
-                          "findings": analyze_source(data.get("source", ""), data.get("filename", "snippet.txt")),
-                          "limits": ["Static flow analysis only; no exploit confirmation",
-                                     "Findings carry status needs_review until an analyst validates them"]}
+                source_code = data.get("source", "")
+                filename = data.get("filename", "snippet.txt")
+                raw_findings = analyze_source(source_code, filename)
+                clf = VulnerabilityAIClassifier()
+                rescored_findings = clf.rescore_ast_findings(raw_findings, source_code)
+                ai_telemetry = clf.get_detailed_explanation(source_code)
+                findings_count = len(rescored_findings)
+                total_checks = max(findings_count, 1)
+                bayesian_conf = ai_telemetry.get("bayesian_confidence")
+                if bayesian_conf is not None:
+                    risk_percent = int(round(float(bayesian_conf) * 100))
+                else:
+                    risk_percent = int(round((findings_count / total_checks) * 100))
+                risk_percent = max(0, min(100, risk_percent))
+                report = {
+                    "schema_version": "1.1",
+                    "mode": "sast_regex_ast_union",
+                    "target": "submitted source",
+                    "findings": rescored_findings,
+                    "ai_telemetry": ai_telemetry,
+                    "ai_gauge": {
+                        "risk_percent": risk_percent,
+                        "findings": findings_count,
+                        "total": total_checks
+                    },
+                    "limits": [
+                        "Static flow analysis only; no exploit confirmation",
+                        "Findings carry status needs_review until an analyst validates them"
+                    ]
+                }
+            elif path == "/api/ai/predict":
+                source = data.get("source", "")
+                clf = VulnerabilityAIClassifier()
+                explanation = clf.get_detailed_explanation(source)
+                return self.json_data(200, explanation)
             else:
                 return self.json_data(404, {"error": "Not found"})
             with REPORT_LOCK:

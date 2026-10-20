@@ -52,6 +52,10 @@ jobs:
       - name: Redact before publishing evidence
         run: python labs/redact_evidence.py evidence/
 
+      - name: Compute DAST artifact integrity checksums (SHA-256)
+        run: |
+          cd evidence && sha256sum * > checksums.sha256 && head -n 20 checksums.sha256
+
       - name: Upload Juice Shop evidence
         if: always()
         uses: actions/upload-artifact@v4

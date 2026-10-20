@@ -1,0 +1,58 @@
+@layer components {
+  /* Reset & Base Styling */
+  dialog.evon-modal {
+    margin: auto;
+    padding: var(--space-lg, 1.5rem);
+    border: 1px solid var(--color-border-subtle, #e5e7eb);
+    border-radius: var(--radius-lg, 12px);
+    background: var(--color-surface-overlay, #ffffff);
+    color: var(--color-text-primary, #111827);
+    max-width: min(90vw, 540px);
+    box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+    
+    /* Animation base: Ẩn mặc định */
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.25s ease-out, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), display 0.25s allow-discrete, overlay 0.25s allow-discrete;
+  }
+
+  /* Backdrop với blur */
+  dialog.evon-modal::backdrop {
+    background-color: oklch(0 0 0 / 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.25s ease-out, display 0.25s allow-discrete, overlay 0.25s allow-discrete;
+  }
+
+  /* Trạng thái mở */
+  dialog.evon-modal[open] {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  dialog.evon-modal[open]::backdrop {
+    opacity: 1;
+  }
+
+  /* Modern Entry Transition (@starting-style) */
+  @starting-style {
+    dialog.evon-modal[open] {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    dialog.evon-modal[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  /* Fallback & Explicit Exit Animation */
+  dialog.evon-modal.is-closing {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  dialog.evon-modal.is-closing::backdrop {
+    opacity: 0;
+  }
+}
